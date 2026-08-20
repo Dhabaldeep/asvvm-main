@@ -1,4 +1,4 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class, androidx.compose.material.ExperimentalMaterialApi::class)
 package com.school.asvvm.ui.components
 
 import androidx.compose.animation.animateContentSize
@@ -17,6 +17,10 @@ import com.school.asvvm.data.model.SchoolClass
 import com.school.asvvm.data.model.Student
 import com.school.asvvm.data.model.Teacher
 import com.school.asvvm.ui.theme.*
+import androidx.compose.material.DismissDirection
+import androidx.compose.material.DismissValue
+import androidx.compose.material.SwipeToDismiss
+import androidx.compose.material.rememberDismissState
 
 @Composable
 fun StudentRow(student: Student, modifier: Modifier = Modifier, onClick: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit, onUnlock: () -> Unit) {
