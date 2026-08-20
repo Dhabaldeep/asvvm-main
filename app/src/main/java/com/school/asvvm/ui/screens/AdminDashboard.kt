@@ -169,28 +169,74 @@ fun AdminDashboard(
 
             Box(modifier = Modifier.fillMaxSize().pullRefresh(pullRefreshState)) {
                 Column(modifier = Modifier.fillMaxSize()) {
+                    // Dashboard Analytics
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text("Total Records", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.SemiBold)
-                        val count = when (selectedTabIndex) {
-                            0 -> students.size
-                            1 -> teachers.size
-                            else -> subjectConfigs.size
+                        ModernCard(modifier = Modifier.weight(1f)) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text("Students", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    "${students.size}", 
+                                    style = MaterialTheme.typography.headlineMedium, 
+                                    fontWeight = FontWeight.ExtraBold, 
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
-                        Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(8.dp)
+                        ModernCard(modifier = Modifier.weight(1f)) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text("Teachers", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    "${teachers.size}", 
+                                    style = MaterialTheme.typography.headlineMedium, 
+                                    fontWeight = FontWeight.ExtraBold, 
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+
+                    if (selectedTabIndex == 0 && students.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                "$count", 
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.labelLarge, 
-                                fontWeight = FontWeight.ExtraBold, 
-                                color = MaterialTheme.colorScheme.primary
+                                "Bulk Actions", 
+                                style = MaterialTheme.typography.labelMedium, 
+                                color = MaterialTheme.colorScheme.secondary, 
+                                fontWeight = FontWeight.SemiBold
                             )
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                OutlinedButton(
+                                    onClick = { viewModel.bulkUnlockStudents(students) },
+                                    shape = RoundedCornerShape(8.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp)
+                                ) {
+                                    Icon(Icons.Default.LockOpen, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("Unlock All", style = MaterialTheme.typography.labelSmall)
+                                }
+                                Button(
+                                    onClick = { viewModel.bulkLockStudents(students) },
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                                    contentPadding = PaddingValues(horizontal = 12.dp)
+                                ) {
+                                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("Lock All", style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
                         }
                     }
 

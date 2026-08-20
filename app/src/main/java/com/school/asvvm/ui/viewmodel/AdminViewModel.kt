@@ -102,6 +102,36 @@ class AdminViewModel @Inject constructor(private val repository: SchoolRepositor
         }
     }
 
+    fun bulkUnlockStudents(students: List<com.school.asvvm.data.model.Student>) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            var successCount = 0
+            for (student in students) {
+                if (student.lockedTerms.isNotEmpty()) {
+                    val res = repository.unlockTermsForStudent(student.id)
+                    if (res.success) successCount++
+                }
+            }
+            _message.value = "Unlocked $successCount students"
+            _isLoading.value = false
+        }
+    }
+
+    fun bulkLockStudents(students: List<com.school.asvvm.data.model.Student>) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            var successCount = 0
+            for (student in students) {
+                if (student.lockedTerms.isEmpty()) {
+                    val res = repository.lockTermForStudent(student.id, "ALL_TERMS")
+                    if (res.success) successCount++
+                }
+            }
+            _message.value = "Locked $successCount students"
+            _isLoading.value = false
+        }
+    }
+
     fun addSubject(classNames: List<String>, subjectName: String, configs: List<SubjectTermConfig>) {
         viewModelScope.launch {
             _isLoading.value = true
