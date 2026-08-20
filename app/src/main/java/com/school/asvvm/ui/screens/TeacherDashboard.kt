@@ -198,27 +198,47 @@ fun TeacherDashboard(
                 Column(modifier = Modifier.fillMaxSize()) {
                     val profile = teacherProfile
                     if (profile != null) {
-                        if (selectedTab != 4 && profile.assignedClasses.isNotEmpty()) {
-                            TeacherClassSelector(
-                                classes = profile.assignedClasses,
-                                selectedClass = assignedClass,
-                                onClassSelected = { viewModel.setAssignedClass(it) }
-                            )
-                        }
-                        val subjectConfigs by viewModel.subjectConfigs.collectAsState()
-                        Box(modifier = Modifier.weight(1f)) {
-                            when (selectedTab) {
-                                0 -> TeacherStudentListView(students)
-                                1 -> TeacherGradingView(students, assignedClass ?: "", viewModel)
-                                2 -> TeacherReportsView(students, marks, subjectConfigs)
-                                3 -> TeacherAttendanceView(
-                                        students = students,
-                                        records = attendanceRecords,
-                                        className = assignedClass ?: "",
-                                        teacherId = profile.email,
-                                        onSubmit = { records -> viewModel.submitAttendance(records) }
-                                     )
-                                4 -> TeacherProfileView(profile)
+                        if (profile.assignedClasses.isNotEmpty()) {
+                            if (selectedTab != 4) {
+                                TeacherClassSelector(
+                                    classes = profile.assignedClasses,
+                                    selectedClass = assignedClass,
+                                    onClassSelected = { viewModel.setAssignedClass(it) }
+                                )
+                            }
+                            val subjectConfigs by viewModel.subjectConfigs.collectAsState()
+                            Box(modifier = Modifier.weight(1f)) {
+                                when (selectedTab) {
+                                    0 -> TeacherStudentListView(students)
+                                    1 -> {
+                                        val currentClass = assignedClass
+                                        if (currentClass != null) {
+                                            TeacherGradingView(students, currentClass, viewModel)
+                                        } else {
+                                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                                Text("Please select a class first.")
+                                            }
+                                        }
+                                    }
+                                    2 -> TeacherReportsView(students, marks, subjectConfigs)
+                                    3 -> {
+                                        val currentClass = assignedClass
+                                        if (currentClass != null) {
+                                            TeacherAttendanceView(
+                                                students = students,
+                                                records = attendanceRecords,
+                                                className = currentClass,
+                                                teacherId = profile.email,
+                                                onSubmit = { records -> viewModel.submitAttendance(records) }
+                                            )
+                                        } else {
+                                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                                Text("Please select a class first.")
+                                            }
+                                        }
+                                    }
+                                    4 -> TeacherProfileView(profile)
+                                }
                             }
                         }
                     }

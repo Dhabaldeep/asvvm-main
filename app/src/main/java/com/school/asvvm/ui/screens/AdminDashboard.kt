@@ -298,84 +298,83 @@ fun AdminDashboard(
                             items(6) { ShimmerStudentRow() }
                         }
                     } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            if (selectedTabIndex == 0) {
-                                if (students.isEmpty()) {
-                                    item {
-                                        EmptyStateView(
-                                            icon = Icons.Default.GroupOff,
-                                            title = "No Students Found",
-                                            subtitle = "There are no students enrolled in $selectedClass yet."
-                                        )
+                        if (selectedTabIndex == 3) {
+                            AdminAttendanceView(
+                                students = students,
+                                records = attendanceRecords,
+                                className = selectedClass,
+                                date = today
+                            )
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                if (selectedTabIndex == 0) {
+                                    if (students.isEmpty()) {
+                                        item {
+                                            EmptyStateView(
+                                                icon = Icons.Default.GroupOff,
+                                                title = "No Students Found",
+                                                subtitle = "There are no students enrolled in $selectedClass yet."
+                                            )
+                                        }
+                                    } else {
+                                        items(students, key = { it.id }) { student ->
+                                            @OptIn(ExperimentalFoundationApi::class)
+                                            StudentRow(
+                                                modifier = Modifier.animateItemPlacement(),
+                                                student = student, 
+                                                onClick = { selectedStudentForDetails = student },
+                                                onEdit = { selectedStudentForEdit = student },
+                                                onDelete = { studentToDelete = student },
+                                                onUnlock = { viewModel.unlockStudent(student.id) }
+                                            )
+                                        }
                                     }
-                                } else {
-                                    items(students, key = { it.id }) { student ->
-                                        @OptIn(ExperimentalFoundationApi::class)
-                                        StudentRow(
-                                            modifier = Modifier.animateItemPlacement(),
-                                            student = student, 
-                                            onClick = { selectedStudentForDetails = student },
-                                            onEdit = { selectedStudentForEdit = student },
-                                            onDelete = { studentToDelete = student },
-                                            onUnlock = { viewModel.unlockStudent(student.id) }
-                                        )
+                                } else if (selectedTabIndex == 1) {
+                                    if (teachers.isEmpty()) {
+                                        item {
+                                            EmptyStateView(
+                                                icon = Icons.Default.PersonOff,
+                                                title = "No Teachers Found",
+                                                subtitle = "No teachers have been added to the system yet."
+                                            )
+                                        }
+                                    } else {
+                                        items(teachers, key = { it.email }) { teacher ->
+                                            @OptIn(ExperimentalFoundationApi::class)
+                                            TeacherRow(
+                                                modifier = Modifier.animateItemPlacement(),
+                                                teacher = teacher,
+                                                onEdit = { selectedTeacherForEdit = teacher },
+                                                onAssignClass = { selectedTeacherForAssign = teacher },
+                                                onDelete = { teacherToDelete = teacher }
+                                            )
+                                        }
+                                    }
+                                } else if (selectedTabIndex == 2) {
+                                    if (subjectConfigs.isEmpty()) {
+                                        item {
+                                            EmptyStateView(
+                                                icon = Icons.Default.LibraryBooks,
+                                                title = "No Subjects Configured",
+                                                subtitle = "Add subjects for $selectedClass to generate report cards."
+                                            )
+                                        }
+                                    } else {
+                                        val groupedSubjects = subjectConfigs.groupBy { it.subjectName }
+                                        items(groupedSubjects.keys.toList()) { subjectName ->
+                                            val configs = groupedSubjects[subjectName] ?: emptyList()
+                                            UnifiedSubjectRow(
+                                                subjectName = subjectName,
+                                                configs = configs,
+                                                onDelete = { viewModel.deleteSubjectGroup(configs) }
+                                            )
+                                        }
                                     }
                                 }
-                            } else if (selectedTabIndex == 1) {
-                                if (teachers.isEmpty()) {
-                                    item {
-                                        EmptyStateView(
-                                            icon = Icons.Default.PersonOff,
-                                            title = "No Faculty Found",
-                                            subtitle = "There are currently no registered teachers."
-                                        )
-                                    }
-                                } else {
-                                    items(teachers, key = { it.email }) { teacher ->
-                                        @OptIn(ExperimentalFoundationApi::class)
-                                        TeacherRow(
-                                            modifier = Modifier.animateItemPlacement(),
-                                            teacher = teacher,
-                                            onEdit = { selectedTeacherForEdit = teacher },
-                                            onAssignClass = { selectedTeacherForAssign = teacher },
-                                            onDelete = { teacherToDelete = teacher }
-                                        )
-                                    }
-                                }
-                            } else if (selectedTabIndex == 2) {
-                                if (subjectConfigs.isEmpty()) {
-                                    item {
-                                        EmptyStateView(
-                                            icon = Icons.Default.LibraryBooks,
-                                            title = "No Subjects Found",
-                                            subtitle = "No subject grading criteria configured for $selectedClass."
-                                        )
-                                    }
-                                } else {
-                                    val groupedSubjects = subjectConfigs.groupBy { it.subjectName }
-                                    items(groupedSubjects.keys.toList()) { subjectName ->
-                                        val configs = groupedSubjects[subjectName] ?: emptyList()
-                                        UnifiedSubjectRow(
-                                            subjectName = subjectName,
-                                            configs = configs,
-                                            onDelete = { viewModel.deleteSubjectGroup(configs) }
-                                        )
-                                    }
-                                }
-                            } else if (selectedTabIndex == 3) {
-                                item {
-                                    AdminAttendanceView(
-                                        students = students,
-                                        records = attendanceRecords,
-                                        className = selectedClass,
-                                        date = today
-                                    )
-                                }
-                                item { Spacer(Modifier.height(80.dp)) }
                             }
                         }
                     }

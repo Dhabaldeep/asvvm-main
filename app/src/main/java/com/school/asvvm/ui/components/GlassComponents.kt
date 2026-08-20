@@ -43,9 +43,10 @@ fun SchoolTopBar(
         color = MaterialTheme.colorScheme.background,
         tonalElevation = 0.dp
     ) {
-        CenterAlignedTopAppBar(
+        @OptIn(ExperimentalMaterial3Api::class)
+        TopAppBar(
             title = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(horizontalAlignment = Alignment.Start) {
                     Text(
                         title, 
                         style = MaterialTheme.typography.titleLarge, 
@@ -71,7 +72,7 @@ fun SchoolTopBar(
                     }
                 }
             },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            colors = TopAppBarDefaults.smallTopAppBarColors(
                 containerColor = Color.Transparent,
                 titleContentColor = MaterialTheme.colorScheme.onSurface
             )
