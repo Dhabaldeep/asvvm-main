@@ -150,20 +150,23 @@ fun TeacherDashboard(
                 }
             } else {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    if (selectedTab != 3 && teacherProfile!!.assignedClasses.isNotEmpty()) {
-                        TeacherClassSelector(
-                            classes = teacherProfile!!.assignedClasses,
-                            selectedClass = assignedClass,
-                            onClassSelected = { viewModel.setAssignedClass(it) }
-                        )
-                    }
-                    val subjectConfigs by viewModel.subjectConfigs.collectAsState()
-                    Box(modifier = Modifier.weight(1f)) {
-                        when (selectedTab) {
-                            0 -> TeacherStudentListView(students)
-                            1 -> TeacherGradingView(students, assignedClass ?: "", viewModel)
-                            2 -> TeacherReportsView(students, marks, subjectConfigs)
-                            3 -> TeacherProfileView(teacherProfile)
+                    val profile = teacherProfile
+                    if (profile != null) {
+                        if (selectedTab != 3 && profile.assignedClasses.isNotEmpty()) {
+                            TeacherClassSelector(
+                                classes = profile.assignedClasses,
+                                selectedClass = assignedClass,
+                                onClassSelected = { viewModel.setAssignedClass(it) }
+                            )
+                        }
+                        val subjectConfigs by viewModel.subjectConfigs.collectAsState()
+                        Box(modifier = Modifier.weight(1f)) {
+                            when (selectedTab) {
+                                0 -> TeacherStudentListView(students)
+                                1 -> TeacherGradingView(students, assignedClass ?: "", viewModel)
+                                2 -> TeacherReportsView(students, marks, subjectConfigs)
+                                3 -> TeacherProfileView(profile)
+                            }
                         }
                     }
                 }

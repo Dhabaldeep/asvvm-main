@@ -1,6 +1,7 @@
 @file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 package com.school.asvvm.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.rememberScrollState
@@ -129,24 +130,36 @@ fun AssignClassDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
         title = { Text("Assign Class") },
         text = {
             Column {
-                Text("Assigning to: ${teacher.name}", fontWeight = FontWeight.Bold)
+                Text("Assigning to: ${teacher.name}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.height(8.dp))
                 if (teacher.assignedClasses.isNotEmpty()) {
-                    Text("Currently assigned:", style = MaterialTheme.typography.labelSmall)
-                    teacher.assignedClasses.forEach { cls ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(cls, style = MaterialTheme.typography.bodyMedium)
-                            IconButton(onClick = { onRemove(cls) }, modifier = Modifier.size(24.dp)) {
-                                Icon(Icons.Default.Delete, contentDescription = "Remove", tint = MaterialTheme.colorScheme.error)
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text("Currently assigned:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.height(8.dp))
+                            teacher.assignedClasses.forEach { cls ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(cls, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                                    IconButton(
+                                        onClick = { onRemove(cls) }, 
+                                        modifier = Modifier.size(28.dp).background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(8.dp))
+                                    ) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Remove", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
+                                    }
+                                }
                             }
                         }
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                Text("Select Class Assignment:", style = MaterialTheme.typography.labelSmall)
+                Text("Select Class Assignment:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                 
                 Box(modifier = Modifier.padding(top = 8.dp)) {
                     OutlinedButton(
@@ -429,18 +442,25 @@ fun EditTeacherDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
         title = { Text("Teacher Details") },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                Text("ReadOnly Information", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-                Divider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                
-                Text("Email: ${teacher.email}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                Spacer(Modifier.height(4.dp))
-                Text("Gender: ${teacher.gender.ifBlank { "Not Set" }}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                Spacer(Modifier.height(4.dp))
-                Text("Assigned Classes: ${if (teacher.assignedClasses.isEmpty()) "None" else teacher.assignedClasses.joinToString()}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Profile Details", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.height(8.dp))
+                        Text("Email: ${teacher.email}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                        Spacer(Modifier.height(4.dp))
+                        Text("Gender: ${teacher.gender.ifBlank { "Not Set" }}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                        Spacer(Modifier.height(4.dp))
+                        Text("Classes: ${if (teacher.assignedClasses.isEmpty()) "None" else teacher.assignedClasses.joinToString()}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                    }
+                }
                 
                 Spacer(Modifier.height(16.dp))
-                Text("Editable Information", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-                Divider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                Text("Edit Information", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.height(8.dp))
 
                 PremiumTextField(value = name, onValueChange = { name = it }, label = "Teacher Name")
                 Spacer(Modifier.height(12.dp))
