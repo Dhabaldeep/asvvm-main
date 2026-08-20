@@ -31,6 +31,7 @@ fun AddStudentDialog(className: String, onDismiss: () -> Unit, onConfirm: (Strin
     var guardian by remember { mutableStateOf("") }
 
     AlertDialog(
+        modifier = Modifier.imePadding(),
         shape = RoundedCornerShape(28.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
@@ -64,6 +65,7 @@ fun AddTeacherDialog(onDismiss: () -> Unit, onConfirm: (String, String, String, 
     var genderExpanded by remember { mutableStateOf(false) }
 
     AlertDialog(
+        modifier = Modifier.imePadding(),
         shape = RoundedCornerShape(28.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
@@ -117,6 +119,7 @@ fun AssignClassDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
     var expanded by remember { mutableStateOf(false) }
 
     AlertDialog(
+        modifier = Modifier.imePadding(),
         shape = RoundedCornerShape(28.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
@@ -216,6 +219,7 @@ fun AddSubjectDialog(
     }
 
     AlertDialog(
+        modifier = Modifier.imePadding(),
         shape = RoundedCornerShape(28.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
@@ -372,6 +376,7 @@ fun EditStudentDialog(student: com.school.asvvm.data.model.Student, onDismiss: (
     var guardian by remember { mutableStateOf(student.guardian) }
 
     AlertDialog(
+        modifier = Modifier.imePadding(),
         shape = RoundedCornerShape(28.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
@@ -402,6 +407,7 @@ fun EditTeacherDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
     var phone by remember { mutableStateOf(teacher.phone) }
 
     AlertDialog(
+        modifier = Modifier.imePadding(),
         shape = RoundedCornerShape(28.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,

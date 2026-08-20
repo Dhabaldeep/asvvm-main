@@ -4,6 +4,7 @@ package com.school.asvvm.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,6 +23,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import com.school.asvvm.data.model.SchoolClass
 import com.school.asvvm.data.model.Student
 import com.school.asvvm.data.model.Teacher
@@ -62,6 +67,12 @@ fun AdminDashboard(
             viewModel.clearMessage()
         }
     }
+
+    @OptIn(ExperimentalMaterialApi::class)
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isLoading,
+        onRefresh = { viewModel.refreshData() }
+    )
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -156,7 +167,7 @@ fun AdminDashboard(
                 }
             }
 
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize().pullRefresh(pullRefreshState)) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
@@ -207,8 +218,10 @@ fun AdminDashboard(
                                         )
                                     }
                                 } else {
-                                    items(students) { student ->
+                                    items(students, key = { it.id }) { student ->
+                                        @OptIn(ExperimentalFoundationApi::class)
                                         StudentRow(
+                                            modifier = Modifier.animateItemPlacement(),
                                             student = student, 
                                             onClick = { selectedStudentForDetails = student },
                                             onEdit = { selectedStudentForEdit = student },
@@ -227,8 +240,10 @@ fun AdminDashboard(
                                         )
                                     }
                                 } else {
-                                    items(teachers) { teacher ->
+                                    items(teachers, key = { it.email }) { teacher ->
+                                        @OptIn(ExperimentalFoundationApi::class)
                                         TeacherRow(
+                                            modifier = Modifier.animateItemPlacement(),
                                             teacher = teacher,
                                             onEdit = { selectedTeacherForEdit = teacher },
                                             onAssignClass = { selectedTeacherForAssign = teacher },
@@ -260,6 +275,14 @@ fun AdminDashboard(
                         }
                     }
                 }
+                @OptIn(ExperimentalMaterialApi::class)
+                PullRefreshIndicator(
+                    refreshing = isLoading,
+                    state = pullRefreshState,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    backgroundColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }

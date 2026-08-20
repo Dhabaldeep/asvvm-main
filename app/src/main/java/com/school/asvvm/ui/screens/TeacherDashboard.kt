@@ -20,6 +20,10 @@ import androidx.compose.ui.unit.sp
 import com.school.asvvm.data.model.Mark
 import com.school.asvvm.data.model.Student
 import com.school.asvvm.data.model.getSubjectsForClass
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import com.school.asvvm.ui.components.*
 import com.school.asvvm.ui.theme.*
 import com.school.asvvm.ui.viewmodel.TeacherViewModel
@@ -53,6 +57,12 @@ fun TeacherDashboard(
             viewModel.clearMessage()
         }
     }
+
+    @OptIn(ExperimentalMaterialApi::class)
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isLoading,
+        onRefresh = { viewModel.initialize(teacherProfile?.email ?: teacherName) }
+    )
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -105,6 +115,7 @@ fun TeacherDashboard(
                 .padding(padding)
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
+                .pullRefresh(pullRefreshState)
         ) {
             if (isLoading) {
                 LazyColumn(
@@ -157,6 +168,14 @@ fun TeacherDashboard(
                     }
                 }
             }
+
+            PullRefreshIndicator(
+                refreshing = isLoading,
+                state = pullRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter),
+                backgroundColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.primary
+            )
         }
     }
 
