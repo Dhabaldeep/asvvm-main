@@ -61,7 +61,13 @@ fun AppNavigation() {
     val navController = rememberNavController()
     var startDestination by remember { mutableStateOf("splash") }
 
+    var updateInfo by remember { mutableStateOf<com.school.asvvm.util.UpdateInfo?>(null) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+
     LaunchedEffect(Unit) {
+        kotlinx.coroutines.launch {
+            updateInfo = com.school.asvvm.util.UpdateManager.checkForUpdate(com.school.asvvm.BuildConfig.VERSION_NAME)
+        }
         val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
         if (user != null && user.email != null) {
             val email = user.email!!.lowercase().trim()
@@ -155,5 +161,26 @@ fun AppNavigation() {
                 )
             }
         }
+    }
+
+    updateInfo?.let { info ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { updateInfo = null },
+            title = { Text("Update Available") },
+            text = { Text("A new version (${info.version}) is available!\n\nRelease notes:\n${info.releaseNotes}") },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    com.school.asvvm.util.UpdateManager.startDownload(context, info)
+                    updateInfo = null
+                }) {
+                    Text("Download & Install")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { updateInfo = null }) {
+                    Text("Later")
+                }
+            }
+        )
     }
 }
