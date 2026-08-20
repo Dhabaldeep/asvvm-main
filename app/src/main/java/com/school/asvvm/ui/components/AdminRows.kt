@@ -17,6 +17,7 @@ import com.school.asvvm.data.model.SchoolClass
 import com.school.asvvm.data.model.Student
 import com.school.asvvm.data.model.Teacher
 import com.school.asvvm.ui.theme.*
+import androidx.compose.foundation.background
 import androidx.compose.material.DismissDirection
 import androidx.compose.material.DismissValue
 import androidx.compose.material.SwipeToDismiss
@@ -25,7 +26,7 @@ import androidx.compose.material.rememberDismissState
 @Composable
 fun StudentRow(student: Student, modifier: Modifier = Modifier, onClick: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit, onUnlock: () -> Unit) {
     val dismissState = rememberDismissState(
-        confirmValueChange = {
+        confirmStateChange = {
             if (it == DismissValue.DismissedToStart || it == DismissValue.DismissedToEnd) {
                 onDelete()
                 true
@@ -104,7 +105,7 @@ fun StudentRow(student: Student, modifier: Modifier = Modifier, onClick: () -> U
 @Composable
 fun TeacherRow(teacher: Teacher, modifier: Modifier = Modifier, onEdit: () -> Unit, onAssignClass: () -> Unit, onDelete: () -> Unit) {
     val dismissState = rememberDismissState(
-        confirmValueChange = {
+        confirmStateChange = {
             if (it == DismissValue.DismissedToStart || it == DismissValue.DismissedToEnd) {
                 onDelete()
                 true
