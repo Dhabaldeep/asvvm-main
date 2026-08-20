@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "776056382117",
+    "project_id": "asvvm-school",
+    "storage_bucket": "asvvm-school.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:776056382117:android:9c3144f23ff0d6b9ca234c",
+        "android_client_info": {
+          "package_name": "com.school.asvvm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxfdx-jCCG8L_0An_O9X_kUPYOm4dMkDA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
