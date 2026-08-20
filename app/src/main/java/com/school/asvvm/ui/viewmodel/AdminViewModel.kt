@@ -167,6 +167,15 @@ class AdminViewModel @Inject constructor(private val repository: SchoolRepositor
         }
     }
 
+    fun removeAssignedClass(email: String, className: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val res = repository.removeAssignedClass(email, className)
+            _message.value = res.message ?: "Class $className removed from $email"
+            _isLoading.value = false
+        }
+    }
+
     fun updateStudent(id: String, name: String, rollNo: String, guardian: String) {
         viewModelScope.launch {
             _isLoading.value = true

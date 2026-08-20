@@ -125,12 +125,24 @@ class SchoolRepository(
 
     suspend fun deleteTeacher(email: String): ApiResponse<Unit> {
         return try {
-            val task = firestore.collection("teachers").document(email).delete()
+            val task = firestore.collection("Staff").document(email).delete()
             task.await()
             refreshTeachers()
             ApiResponse(success = true, message = "Teacher deleted successfully")
         } catch (e: Exception) {
             ApiResponse(success = false, message = e.message ?: "Failed to delete teacher")
+        }
+    }
+
+    suspend fun removeAssignedClass(email: String, className: String): ApiResponse<Unit> {
+        val safeEmail = email.trim().lowercase()
+        return try {
+            val docRef = firestore.collection("Staff").document(safeEmail)
+            val task = docRef.update("assignedClasses", com.google.firebase.firestore.FieldValue.arrayRemove(className))
+            withTimeoutOrNull(3000L) { task.await() }
+            ApiResponse(success = true)
+        } catch (e: Exception) {
+            ApiResponse(success = false, message = e.message)
         }
     }
 

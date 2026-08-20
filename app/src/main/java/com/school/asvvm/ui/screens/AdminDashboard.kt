@@ -327,6 +327,10 @@ fun AdminDashboard(
             onConfirm = { className ->
                 viewModel.assignClassToTeacher(teacher.email, className)
                 selectedTeacherForAssign = null
+            },
+            onRemove = { className ->
+                viewModel.removeAssignedClass(teacher.email, className)
+                selectedTeacherForAssign = null
             }
         )
     }

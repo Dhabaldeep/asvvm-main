@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.ui.window.Dialog
 import androidx.compose.runtime.*
@@ -114,7 +115,7 @@ fun AddTeacherDialog(onDismiss: () -> Unit, onConfirm: (String, String, String, 
 }
 
 @Composable
-fun AssignClassDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+fun AssignClassDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (String) -> Unit, onRemove: (String) -> Unit = {}) {
     var selectedClass by remember { mutableStateOf(SchoolClass.NURSERY.value) }
     var expanded by remember { mutableStateOf(false) }
 
@@ -130,7 +131,19 @@ fun AssignClassDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
             Column {
                 Text("Assigning to: ${teacher.name}", fontWeight = FontWeight.Bold)
                 if (teacher.assignedClasses.isNotEmpty()) {
-                    Text("Currently assigned: ${teacher.assignedClasses.joinToString()}", style = MaterialTheme.typography.labelSmall)
+                    Text("Currently assigned:", style = MaterialTheme.typography.labelSmall)
+                    teacher.assignedClasses.forEach { cls ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(cls, style = MaterialTheme.typography.bodyMedium)
+                            IconButton(onClick = { onRemove(cls) }, modifier = Modifier.size(24.dp)) {
+                                Icon(Icons.Default.Delete, contentDescription = "Remove", tint = MaterialTheme.colorScheme.error)
+                            }
+                        }
+                    }
                 }
                 Spacer(Modifier.height(16.dp))
                 Text("Select Class Assignment:", style = MaterialTheme.typography.labelSmall)
