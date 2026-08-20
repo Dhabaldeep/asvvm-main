@@ -17,6 +17,23 @@ data class Teacher(
     var gender: String = ""
 )
 
+data class Attendance(
+    var id: String = "",
+    var studentId: String = "",
+    var className: String = "",
+    var date: String = "",
+    var status: String = "Present", // "Present", "Absent", "Late"
+    var teacherId: String = ""
+)
+
+data class Notice(
+    var id: String = "",
+    var title: String = "",
+    var message: String = "",
+    var timestamp: Long = 0L,
+    var author: String = ""
+)
+
 enum class ExamTerm(val title: String) {
     FIRST_HALF("1st Half"),
     SECOND_HALF("2nd Half"),

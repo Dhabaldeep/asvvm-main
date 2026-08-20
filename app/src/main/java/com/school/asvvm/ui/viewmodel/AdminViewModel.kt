@@ -41,6 +41,32 @@ class AdminViewModel @Inject constructor(private val repository: SchoolRepositor
     val allSubjectConfigs: StateFlow<List<com.school.asvvm.data.model.SubjectConfig>> = repository.getAllSubjectConfigs()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val notices: StateFlow<List<com.school.asvvm.data.model.Notice>> = repository.listenToNotices()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun getAttendance(className: String, date: String): Flow<List<com.school.asvvm.data.model.Attendance>> {
+        return repository.getAttendance(className, date)
+    }
+
+    fun submitNotice(title: String, message: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val notice = com.school.asvvm.data.model.Notice(
+                title = title,
+                message = message,
+                timestamp = System.currentTimeMillis(),
+                author = "Admin"
+            )
+            val res = repository.submitNotice(notice)
+            if (res.success) {
+                _message.value = "Notice published!"
+            } else {
+                _message.value = "Failed to publish notice"
+            }
+            _isLoading.value = false
+        }
+    }
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 

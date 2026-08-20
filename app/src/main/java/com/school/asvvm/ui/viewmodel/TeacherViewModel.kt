@@ -44,6 +44,11 @@ class TeacherViewModel @Inject constructor(
         if (it != null) repository.getSubjectConfigs(it) else kotlinx.coroutines.flow.flowOf(emptyList())
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val notices = repository.listenToNotices().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    private val _attendanceRecords = MutableStateFlow<List<com.school.asvvm.data.model.Attendance>>(emptyList())
+    val attendanceRecords = _attendanceRecords.asStateFlow()
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
@@ -105,6 +110,29 @@ class TeacherViewModel @Inject constructor(
                 // Background calculation of results
                 calculateAndSubmitResults(marksList)
                 _message.value = "Marks saved & syncing..."
+            }
+            _isLoading.value = false
+        }
+    }
+
+    private var attendanceJob: kotlinx.coroutines.Job? = null
+    fun loadAttendanceForDate(className: String, date: String) {
+        attendanceJob?.cancel()
+        attendanceJob = viewModelScope.launch {
+            repository.getAttendance(className, date).collect { records ->
+                _attendanceRecords.value = records
+            }
+        }
+    }
+
+    fun submitAttendance(records: List<com.school.asvvm.data.model.Attendance>) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val res = repository.submitAttendance(records)
+            if (res.success) {
+                _message.value = "Attendance saved!"
+            } else {
+                _message.value = "Failed to save attendance"
             }
             _isLoading.value = false
         }

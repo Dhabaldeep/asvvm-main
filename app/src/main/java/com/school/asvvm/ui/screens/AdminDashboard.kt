@@ -53,9 +53,17 @@ fun AdminDashboard(
     var studentToDelete by remember { mutableStateOf<Student?>(null) }
     var teacherToDelete by remember { mutableStateOf<Teacher?>(null) }
     var showSettingsMenu by remember { mutableStateOf(false) }
+    var showNotices by remember { mutableStateOf(false) }
+    var showCreateNotice by remember { mutableStateOf(false) }
     
     val students by viewModel.students.collectAsState()
     val teachers by viewModel.teachers.collectAsState()
+    val notices by viewModel.notices.collectAsState()
+    
+    // For admin attendance view, fetch attendance for today
+    val sdf = remember { java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()) }
+    val today = remember { sdf.format(java.util.Date()) }
+    val attendanceRecords by viewModel.getAttendance(selectedClass, today).collectAsState(initial = emptyList())
     val subjectConfigs by viewModel.subjectConfigs.collectAsState()
     val allExistingSubjects by viewModel.allSubjectConfigs.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -84,6 +92,11 @@ fun AdminDashboard(
                 subtitle = "Management Console",
                 onLogout = onLogout,
                 actions = {
+                    Box {
+                        IconButton(onClick = { showNotices = true }) {
+                            Icon(Icons.Default.Notifications, contentDescription = "Notices", tint = MaterialTheme.colorScheme.primary)
+                        }
+                    }
                     Box {
                         IconButton(onClick = { showSettingsMenu = true }) {
                             Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
@@ -121,13 +134,21 @@ fun AdminDashboard(
                     icon = { Icon(Icons.Default.PersonAdd, contentDescription = null) },
                     text = { Text("Add Teacher") }
                 )
-            } else {
+            } else if (selectedTabIndex == 2) {
                 ExtendedFloatingActionButton(
                     onClick = { showAddSubjectDialog = true },
                     containerColor = MaterialTheme.colorScheme.tertiary,
                     contentColor = MaterialTheme.colorScheme.onTertiary,
                     icon = { Icon(Icons.Default.LibraryBooks, contentDescription = null) },
                     text = { Text("Add Subject") }
+                )
+            } else if (selectedTabIndex == 3) {
+                ExtendedFloatingActionButton(
+                    onClick = { showCreateNotice = true },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    icon = { Icon(Icons.Default.Campaign, contentDescription = null) },
+                    text = { Text("Broadcast Notice") }
                 )
             }
         }
@@ -159,9 +180,14 @@ fun AdminDashboard(
                     onClick = { selectedTabIndex = 2 },
                     text = { Text("Subjects", fontWeight = FontWeight.Bold) }
                 )
+                Tab(
+                    selected = selectedTabIndex == 3,
+                    onClick = { selectedTabIndex = 3 },
+                    text = { Text("Attendance", fontWeight = FontWeight.Bold) }
+                )
             }
 
-            if (selectedTabIndex == 0 || selectedTabIndex == 2) {
+            if (selectedTabIndex == 0 || selectedTabIndex == 2 || selectedTabIndex == 3) {
                 // Secondary Class Tabs
                 ScrollableTabRow(
                     selectedTabIndex = SchoolClass.values().indexOfFirst { it.value == selectedClass },
@@ -191,34 +217,36 @@ fun AdminDashboard(
             Box(modifier = Modifier.fillMaxSize().pullRefresh(pullRefreshState)) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     // Dashboard Analytics
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        ModernCard(modifier = Modifier.weight(1f)) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text("Students", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    "${students.size}", 
-                                    style = MaterialTheme.typography.headlineMedium, 
-                                    fontWeight = FontWeight.ExtraBold, 
-                                    color = MaterialTheme.colorScheme.primary
-                                )
+                    if (selectedTabIndex != 3) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            ModernCard(modifier = Modifier.weight(1f)) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Text("Students", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        "${students.size}", 
+                                        style = MaterialTheme.typography.headlineMedium, 
+                                        fontWeight = FontWeight.ExtraBold, 
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
                             }
-                        }
-                        ModernCard(modifier = Modifier.weight(1f)) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text("Teachers", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    "${teachers.size}", 
-                                    style = MaterialTheme.typography.headlineMedium, 
-                                    fontWeight = FontWeight.ExtraBold, 
-                                    color = MaterialTheme.colorScheme.primary
-                                )
+                            ModernCard(modifier = Modifier.weight(1f)) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Text("Teachers", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        "${teachers.size}", 
+                                        style = MaterialTheme.typography.headlineMedium, 
+                                        fontWeight = FontWeight.ExtraBold, 
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
                             }
                         }
                     }
@@ -318,7 +346,7 @@ fun AdminDashboard(
                                         )
                                     }
                                 }
-                            } else {
+                            } else if (selectedTabIndex == 2) {
                                 if (subjectConfigs.isEmpty()) {
                                     item {
                                         EmptyStateView(
@@ -338,6 +366,16 @@ fun AdminDashboard(
                                         )
                                     }
                                 }
+                            } else if (selectedTabIndex == 3) {
+                                item {
+                                    AdminAttendanceView(
+                                        students = students,
+                                        records = attendanceRecords,
+                                        className = selectedClass,
+                                        date = today
+                                    )
+                                }
+                                item { Spacer(Modifier.height(80.dp)) }
                             }
                         }
                     }
@@ -383,6 +421,23 @@ fun AdminDashboard(
             onConfirm = { classNames, subjectName, configs ->
                 viewModel.addSubject(classNames, subjectName, configs)
                 showAddSubjectDialog = false
+            }
+        )
+    }
+
+    if (showNotices) {
+        NoticeBoardDialog(
+            notices = notices,
+            onDismiss = { showNotices = false }
+        )
+    }
+
+    if (showCreateNotice) {
+        CreateNoticeDialog(
+            onDismiss = { showCreateNotice = false },
+            onSubmit = { title, msg ->
+                viewModel.submitNotice(title, msg)
+                showCreateNotice = false
             }
         )
     }

@@ -417,4 +417,60 @@ class SchoolRepository(
             ApiResponse(success = false, message = e.message)
         }
     }
+
+    // Attendance
+    fun getAttendance(className: String, date: String): Flow<List<Attendance>> = callbackFlow {
+        val listener = firestore.collection("attendance")
+            .whereEqualTo("className", className)
+            .whereEqualTo("date", date)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
+                val records = snapshot?.toObjects(Attendance::class.java) ?: emptyList()
+                trySend(records)
+            }
+        awaitClose { listener.remove() }
+    }
+
+    suspend fun submitAttendance(records: List<Attendance>): ApiResponse<Unit> {
+        return try {
+            val batch = firestore.batch()
+            for (record in records) {
+                if (record.id.isBlank()) record.id = "${record.studentId}_${record.date}"
+                val docRef = firestore.collection("attendance").document(record.id)
+                batch.set(docRef, record)
+            }
+            batch.commit().await()
+            ApiResponse(success = true)
+        } catch (e: Exception) {
+            ApiResponse(success = false, message = e.message)
+        }
+    }
+
+    // Notices
+    fun listenToNotices(): Flow<List<Notice>> = callbackFlow {
+        val listener = firestore.collection("notices")
+            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
+                val notices = snapshot?.toObjects(Notice::class.java) ?: emptyList()
+                trySend(notices)
+            }
+        awaitClose { listener.remove() }
+    }
+
+    suspend fun submitNotice(notice: Notice): ApiResponse<Unit> {
+        return try {
+            if (notice.id.isBlank()) notice.id = java.util.UUID.randomUUID().toString()
+            firestore.collection("notices").document(notice.id).set(notice).await()
+            ApiResponse(success = true)
+        } catch (e: Exception) {
+            ApiResponse(success = false, message = e.message)
+        }
+    }
 }

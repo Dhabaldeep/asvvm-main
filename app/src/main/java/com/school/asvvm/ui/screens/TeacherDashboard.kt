@@ -39,12 +39,24 @@ fun TeacherDashboard(
     var selectedTab by remember { mutableStateOf(0) }
     var showChangePassword by remember { mutableStateOf(false) }
     var showSettingsMenu by remember { mutableStateOf(false) }
+    var showNotices by remember { mutableStateOf(false) }
     
     val teacherProfile by viewModel.teacherProfile.collectAsState()
     val assignedClass by viewModel.assignedClass.collectAsState()
     val students by viewModel.students.collectAsState()
     val marks by viewModel.marks.collectAsState()
+    val attendanceRecords by viewModel.attendanceRecords.collectAsState()
+    val notices by viewModel.notices.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
+    // When assigned class changes, load today's attendance
+    LaunchedEffect(assignedClass) {
+        if (assignedClass != null) {
+            val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+            val today = sdf.format(java.util.Date())
+            viewModel.loadAttendanceForDate(assignedClass!!, today)
+        }
+    }
     val message by viewModel.message.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -74,6 +86,11 @@ fun TeacherDashboard(
                 subtitle = "${teacherProfile?.name ?: teacherName}",
                 onLogout = onLogout,
                 actions = {
+                    Box {
+                        IconButton(onClick = { showNotices = true }) {
+                            Icon(Icons.Default.Notifications, contentDescription = "Notices", tint = MaterialTheme.colorScheme.primary)
+                        }
+                    }
                     Box {
                         IconButton(onClick = { showSettingsMenu = true }) {
                             Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
@@ -127,6 +144,12 @@ fun TeacherDashboard(
                 NavigationBarItem(
                     selected = selectedTab == 3,
                     onClick = { selectedTab = 3 },
+                    icon = { Icon(Icons.Default.EventAvailable, contentDescription = null) },
+                    label = { Text("Attendance") }
+                )
+                NavigationBarItem(
+                    selected = selectedTab == 4,
+                    onClick = { selectedTab = 4 },
                     icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
                     label = { Text("Profile") }
                 )
@@ -175,7 +198,7 @@ fun TeacherDashboard(
                 Column(modifier = Modifier.fillMaxSize()) {
                     val profile = teacherProfile
                     if (profile != null) {
-                        if (selectedTab != 3 && profile.assignedClasses.isNotEmpty()) {
+                        if (selectedTab != 4 && profile.assignedClasses.isNotEmpty()) {
                             TeacherClassSelector(
                                 classes = profile.assignedClasses,
                                 selectedClass = assignedClass,
@@ -188,7 +211,14 @@ fun TeacherDashboard(
                                 0 -> TeacherStudentListView(students)
                                 1 -> TeacherGradingView(students, assignedClass ?: "", viewModel)
                                 2 -> TeacherReportsView(students, marks, subjectConfigs)
-                                3 -> TeacherProfileView(profile)
+                                3 -> TeacherAttendanceView(
+                                        students = students,
+                                        records = attendanceRecords,
+                                        className = assignedClass ?: "",
+                                        teacherId = profile.email,
+                                        onSubmit = { records -> viewModel.submitAttendance(records) }
+                                     )
+                                4 -> TeacherProfileView(profile)
                             }
                         }
                     }
@@ -213,6 +243,13 @@ fun TeacherDashboard(
                 viewModel.changePassword(teacherName, old, new)
                 showChangePassword = false
             }
+        )
+    }
+
+    if (showNotices) {
+        NoticeBoardDialog(
+            notices = notices,
+            onDismiss = { showNotices = false }
         )
     }
 }
