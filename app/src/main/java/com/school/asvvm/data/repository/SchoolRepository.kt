@@ -258,6 +258,21 @@ class SchoolRepository(
         }
     }
 
+    fun listenToTeacherProfile(emailOrName: String): Flow<Teacher?> = callbackFlow {
+        val safeId = emailOrName.trim().lowercase()
+        val listener = firestore.collection("Staff")
+            .whereEqualTo("email", safeId)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    trySend(null)
+                    return@addSnapshotListener
+                }
+                val teacher = snapshot?.documents?.firstOrNull()?.toObject(Teacher::class.java)
+                trySend(teacher)
+            }
+        awaitClose { listener.remove() }
+    }
+
     suspend fun loadTeacherProfile(emailOrName: String): ApiResponse<Teacher> {
         val safeId = emailOrName.trim().lowercase()
         return try {

@@ -101,7 +101,7 @@ object UpdateManager {
                 override fun onReceive(context: Context, intent: Intent) {
                     val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                     if (id == downloadId) {
-                        installApk(context, id)
+                        notifyDownloadReady(context, id)
                         try {
                             context.unregisterReceiver(this)
                         } catch (e: Exception) {
@@ -117,31 +117,16 @@ object UpdateManager {
         }
     }
 
-    private fun installApk(context: Context, downloadId: Long) {
+    private fun notifyDownloadReady(context: Context, downloadId: Long) {
         val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val query = DownloadManager.Query().setFilterById(downloadId)
-        val cursor = downloadManager.query(query)
+        val uri = downloadManager.getUriForDownloadedFile(downloadId)
         
-        if (cursor.moveToFirst()) {
-            val statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-            if (statusIndex != -1 && cursor.getInt(statusIndex) == DownloadManager.STATUS_SUCCESSFUL) {
-                val uriIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
-                if (uriIndex != -1) {
-                    val localUriString = cursor.getString(uriIndex)
-                    val uri = Uri.parse(localUriString)
-                    
-                    val installIntent = Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(uri, "application/vnd.android.package-archive")
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    }
-                    try {
-                        context.startActivity(installIntent)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Failed to launch installer", e)
-                    }
-                }
+        if (uri != null) {
+            val readyIntent = Intent("com.school.asvvm.ACTION_DOWNLOAD_READY").apply {
+                putExtra("downloadUri", uri.toString())
+                setPackage(context.packageName)
             }
+            context.sendBroadcast(readyIntent)
         }
-        cursor.close()
     }
 }

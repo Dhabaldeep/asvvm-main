@@ -38,7 +38,8 @@ import com.school.asvvm.ui.viewmodel.SubjectTermConfig
 @Composable
 fun AdminDashboard(
     viewModel: AdminViewModel,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onCheckUpdate: () -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     var selectedClass by remember { mutableStateOf(SchoolClass.NURSERY.value) }
@@ -51,6 +52,7 @@ fun AdminDashboard(
     var selectedStudentForDetails by remember { mutableStateOf<Student?>(null) }
     var studentToDelete by remember { mutableStateOf<Student?>(null) }
     var teacherToDelete by remember { mutableStateOf<Teacher?>(null) }
+    var showSettingsMenu by remember { mutableStateOf(false) }
     
     val students by viewModel.students.collectAsState()
     val teachers by viewModel.teachers.collectAsState()
@@ -80,7 +82,26 @@ fun AdminDashboard(
             SchoolTopBar(
                 title = "ASVVM Admin",
                 subtitle = "Management Console",
-                onLogout = onLogout
+                onLogout = onLogout,
+                actions = {
+                    Box {
+                        IconButton(onClick = { showSettingsMenu = true }) {
+                            Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
+                        }
+                        DropdownMenu(
+                            expanded = showSettingsMenu,
+                            onDismissRequest = { showSettingsMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Check for Updates") },
+                                onClick = {
+                                    showSettingsMenu = false
+                                    onCheckUpdate()
+                                }
+                            )
+                        }
+                    }
+                }
             )
         },
         floatingActionButton = {

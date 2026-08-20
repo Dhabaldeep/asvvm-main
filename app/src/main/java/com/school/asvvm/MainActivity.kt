@@ -38,6 +38,13 @@ import com.school.asvvm.ui.viewmodel.TeacherViewModel
 
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.hilt.navigation.compose.hiltViewModel
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.Uri
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -63,7 +70,39 @@ fun AppNavigation() {
     var startDestination by remember { mutableStateOf("splash") }
 
     var updateInfo by remember { mutableStateOf<com.school.asvvm.util.UpdateInfo?>(null) }
+    var downloadReadyUri by remember { mutableStateOf<String?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
+
+    DisposableEffect(context) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(c: Context, intent: Intent) {
+                if (intent.action == "com.school.asvvm.ACTION_DOWNLOAD_READY") {
+                    downloadReadyUri = intent.getStringExtra("downloadUri")
+                }
+            }
+        }
+        context.registerReceiver(
+            receiver, 
+            IntentFilter("com.school.asvvm.ACTION_DOWNLOAD_READY"),
+            Context.RECEIVER_EXPORTED
+        )
+        onDispose {
+            try { context.unregisterReceiver(receiver) } catch (e: Exception) {}
+        }
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    val onCheckUpdate: () -> Unit = {
+        coroutineScope.launch {
+            val info = com.school.asvvm.util.UpdateManager.checkForUpdate(com.school.asvvm.BuildConfig.VERSION_NAME)
+            if (info != null) {
+                updateInfo = info
+            } else {
+                android.widget.Toast.makeText(context, "You are on the latest version!", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         launch {
@@ -142,7 +181,8 @@ fun AppNavigation() {
                         navController.navigate("login") {
                             popUpTo(0) { inclusive = true }
                         }
-                    }
+                    },
+                    onCheckUpdate = onCheckUpdate
                 )
             }
             composable("teacher_dashboard/{username}") { backStackEntry ->
@@ -158,7 +198,8 @@ fun AppNavigation() {
                         navController.navigate("login") {
                             popUpTo(0) { inclusive = true }
                         }
-                    }
+                    },
+                    onCheckUpdate = onCheckUpdate
                 )
             }
         }
@@ -167,19 +208,78 @@ fun AppNavigation() {
     updateInfo?.let { info ->
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { updateInfo = null },
-            title = { Text("Update Available") },
-            text = { Text("A new version (${info.version}) is available!\n\nRelease notes:\n${info.releaseNotes}") },
+            shape = RoundedCornerShape(24.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.primary,
+            title = { Text("Update Available", fontWeight = FontWeight.Bold) },
+            text = { 
+                Column {
+                    Text("A new version ", style = MaterialTheme.typography.bodyMedium)
+                    Text("v${info.version}", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold)
+                    Text(" is available!", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(Modifier.height(16.dp))
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text("Release notes:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.height(4.dp))
+                            Text(info.releaseNotes, style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            },
             confirmButton = {
-                androidx.compose.material3.TextButton(onClick = {
-                    com.school.asvvm.util.UpdateManager.startDownload(context, info)
-                    updateInfo = null
-                }) {
-                    Text("Download & Install")
+                androidx.compose.material3.Button(
+                    onClick = {
+                        com.school.asvvm.util.UpdateManager.startDownload(context, info)
+                        updateInfo = null
+                    },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Download Update")
                 }
             },
             dismissButton = {
                 androidx.compose.material3.TextButton(onClick = { updateInfo = null }) {
                     Text("Later")
+                }
+            }
+        )
+    }
+
+    downloadReadyUri?.let { uriString ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { downloadReadyUri = null },
+            shape = RoundedCornerShape(24.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.primary,
+            title = { Text("Download Complete", fontWeight = FontWeight.Bold) },
+            text = { Text("The update has been successfully downloaded. Would you like to install it now?", style = MaterialTheme.typography.bodyMedium) },
+            confirmButton = {
+                androidx.compose.material3.Button(
+                    onClick = {
+                        val installIntent = Intent(Intent.ACTION_VIEW).apply {
+                            setDataAndType(Uri.parse(uriString), "application/vnd.android.package-archive")
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        }
+                        try {
+                            context.startActivity(installIntent)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                        downloadReadyUri = null
+                    },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Install Now")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { downloadReadyUri = null }) {
+                    Text("Cancel")
                 }
             }
         )

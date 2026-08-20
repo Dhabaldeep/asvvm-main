@@ -50,31 +50,41 @@ class TeacherViewModel @Inject constructor(
     private val _message = MutableStateFlow<String?>(null)
     val message = _message.asStateFlow()
 
+    private var profileJob: kotlinx.coroutines.Job? = null
+
     fun initialize(teacherEmailOrName: String) {
         if (teacherEmailOrName.isBlank()) {
             _message.value = "Login details missing. Please logout and login again."
             return
         }
-        viewModelScope.launch {
+        profileJob?.cancel()
+        profileJob = viewModelScope.launch {
             _isLoading.value = true
-            _teacherProfile.value = null // Reset previous profile to prevent flimmers
             try {
-                val res = repository.loadTeacherProfile(teacherEmailOrName)
-                if (res.success && res.data != null) {
-                    val profile = res.data
-                    _teacherProfile.value = profile
-                    if (profile.assignedClasses.isNotEmpty()) {
-                        setAssignedClass(profile.assignedClasses.first())
+                repository.listenToTeacherProfile(teacherEmailOrName).collect { profile ->
+                    _isLoading.value = false
+                    if (profile != null) {
+                        val currentClass = _assignedClass.value
+                        _teacherProfile.value = profile
+                        
+                        // If they have classes and current class is null, select the first one
+                        if (profile.assignedClasses.isNotEmpty()) {
+                            if (currentClass == null || !profile.assignedClasses.contains(currentClass)) {
+                                setAssignedClass(profile.assignedClasses.first())
+                            }
+                        } else {
+                            if (currentClass != null) {
+                                _assignedClass.value = null
+                            }
+                            _message.value = "No classes assigned to you"
+                        }
                     } else {
-                        _message.value = "No classes assigned to you"
+                        _teacherProfile.value = null
                     }
-                } else {
-                    _message.value = res.message ?: "Profile not found"
                 }
             } catch (e: Exception) {
-                _message.value = "Connection Error. Please check your internet."
-            } finally {
                 _isLoading.value = false
+                _message.value = "Connection Error. Please check your internet."
             }
         }
     }

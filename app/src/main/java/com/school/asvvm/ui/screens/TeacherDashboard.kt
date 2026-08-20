@@ -33,10 +33,12 @@ import com.school.asvvm.util.PdfGenerator
 fun TeacherDashboard(
     teacherName: String,
     viewModel: TeacherViewModel,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onCheckUpdate: () -> Unit = {}
 ) {
     var selectedTab by remember { mutableStateOf(0) }
-    var showSettings by remember { mutableStateOf(false) }
+    var showChangePassword by remember { mutableStateOf(false) }
+    var showSettingsMenu by remember { mutableStateOf(false) }
     
     val teacherProfile by viewModel.teacherProfile.collectAsState()
     val assignedClass by viewModel.assignedClass.collectAsState()
@@ -72,8 +74,29 @@ fun TeacherDashboard(
                 subtitle = "${teacherProfile?.name ?: teacherName}",
                 onLogout = onLogout,
                 actions = {
-                    IconButton(onClick = { showSettings = true }) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
+                    Box {
+                        IconButton(onClick = { showSettingsMenu = true }) {
+                            Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
+                        }
+                        DropdownMenu(
+                            expanded = showSettingsMenu,
+                            onDismissRequest = { showSettingsMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Change Password") },
+                                onClick = {
+                                    showSettingsMenu = false
+                                    showChangePassword = true
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Check for Updates") },
+                                onClick = {
+                                    showSettingsMenu = false
+                                    onCheckUpdate()
+                                }
+                            )
+                        }
                     }
                 }
             )
@@ -182,18 +205,17 @@ fun TeacherDashboard(
         }
     }
 
-    if (showSettings) {
+    if (showChangePassword) {
         ChangePasswordDialog(
             username = teacherName,
-            onDismiss = { showSettings = false },
+            onDismiss = { showChangePassword = false },
             onConfirm = { old, new ->
                 viewModel.changePassword(teacherName, old, new)
-                showSettings = false
+                showChangePassword = false
             }
         )
     }
 }
-
 
 
 
