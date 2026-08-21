@@ -126,53 +126,66 @@ fun AppNavigation() {
         launch {
             updateInfo = com.school.asvvm.util.UpdateManager.checkForUpdate(com.school.asvvm.BuildConfig.VERSION_NAME)
         }
-        val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
-        if (user != null && user.email != null) {
-            val email = user.email!!.lowercase().trim()
-            val role = if (email == "admin@school.com") {
-                "Admin"
-            } else {
-                try {
-                    val doc = withTimeoutOrNull(5000L) {
-                        com.google.firebase.firestore.FirebaseFirestore.getInstance()
-                            .collection("Staff")
-                            .document(email)
-                            .get()
-                            .await()
+        
+        // Wait for navController to initialize its graph
+        kotlinx.coroutines.delay(100) 
+        
+        val currentRoute = navController.currentDestination?.route
+        if (currentRoute == null || currentRoute == "splash") {
+            val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+            if (user != null && user.email != null) {
+                val email = user.email!!.lowercase().trim()
+                val role = if (email == "admin@school.com") {
+                    "Admin"
+                } else {
+                    try {
+                        val doc = withTimeoutOrNull(5000L) {
+                            com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                                .collection("Staff")
+                                .document(email)
+                                .get()
+                                .await()
+                        }
+                        doc?.getString("role") ?: "Teacher"
+                    } catch (e: Exception) { 
+                        "Teacher" 
                     }
-                    doc?.getString("role") ?: "Teacher"
-                } catch (e: Exception) { 
-                    "Teacher" 
+                }
+                
+                if (role == "Admin") {
+                    navController.navigate("admin_dashboard") {
+                        popUpTo("splash") { inclusive = true }
+                    }
+                } else {
+                    navController.navigate("teacher_dashboard/$email") {
+                        popUpTo("splash") { inclusive = true }
+                    }
+                }
+            } else {
+                navController.navigate("login") {
+                    popUpTo("splash") { inclusive = true }
                 }
             }
-            
-            if (role == "Admin") {
-                startDestination = "admin_dashboard"
-            } else {
-                startDestination = "teacher_dashboard/$email"
-            }
-        } else {
-            startDestination = "login"
         }
     }
 
-    if (startDestination == "splash") {
-        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                CircularProgressIndicator()
-                Spacer(Modifier.height(16.dp))
-                Text("Authenticating", style = MaterialTheme.typography.bodyMedium)
+    NavHost(
+        navController = navController, 
+        startDestination = "splash",
+        enterTransition = { androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically(initialOffsetY = { 50 }) },
+        exitTransition = { androidx.compose.animation.fadeOut() + androidx.compose.animation.slideOutVertically(targetOffsetY = { -50 }) },
+        popEnterTransition = { androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically(initialOffsetY = { -50 }) },
+        popExitTransition = { androidx.compose.animation.fadeOut() + androidx.compose.animation.slideOutVertically(targetOffsetY = { 50 }) }
+    ) {
+        composable("splash") {
+            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator()
+                    Spacer(Modifier.height(16.dp))
+                    Text("Authenticating", style = MaterialTheme.typography.bodyMedium)
+                }
             }
         }
-    } else {
-        NavHost(
-            navController = navController, 
-            startDestination = startDestination,
-            enterTransition = { androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically(initialOffsetY = { 50 }) },
-            exitTransition = { androidx.compose.animation.fadeOut() + androidx.compose.animation.slideOutVertically(targetOffsetY = { -50 }) },
-            popEnterTransition = { androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically(initialOffsetY = { -50 }) },
-            popExitTransition = { androidx.compose.animation.fadeOut() + androidx.compose.animation.slideOutVertically(targetOffsetY = { 50 }) }
-        ) {
             composable("login") {
                 val viewModel: AuthViewModel = hiltViewModel()
                 LoginScreen(
@@ -221,7 +234,6 @@ fun AppNavigation() {
                 )
             }
         }
-    }
 
     updateInfo?.let { info ->
         androidx.compose.material3.AlertDialog(
