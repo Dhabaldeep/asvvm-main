@@ -48,6 +48,22 @@ class AuthViewModel @Inject constructor(
             }
         }
     }
+    
+    fun studentLogin(rollNo: String, accessCode: String) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            try {
+                val student = repository.verifyStudentAccess(rollNo, accessCode)
+                if (student != null) {
+                    _authState.value = AuthState.Success("Student", student.id)
+                } else {
+                    _authState.value = AuthState.Error("Invalid Roll Number or Access Code")
+                }
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error("Connection failed: ${e.message}")
+            }
+        }
+    }
 
     fun register(email: String, pass: String) {
         val safeEmail = email.trim().lowercase()

@@ -110,12 +110,11 @@ class SchoolRepository(
         // Intentionally empty: Real-time queries handle refresh
     }
 
-    suspend fun addStudent(name: String, roll: String, className: String, guardian: String): ApiResponse<Unit> {
+    suspend fun addStudent(name: String, roll: String, className: String, guardian: String, accessCode: String): ApiResponse<Unit> {
         return try {
-            val id = UUID.randomUUID().toString()
-            val student = Student(id, roll, name, className, guardian)
-            val task = firestore.collection("students").document(id).set(student)
-            withTimeoutOrNull(3000L) { task.await() } // Await network sync or timeout gracefully for offline
+            val ref = firestore.collection("students").document()
+            val student = com.school.asvvm.data.model.Student(id = ref.id, rollNo = roll, name = name, className = className, guardian = guardian, accessCode = accessCode)
+            ref.set(student).await()
             ApiResponse(success = true, message = "Student added")
         } catch (e: Exception) {
             ApiResponse(success = false, message = e.message)
@@ -506,5 +505,51 @@ class SchoolRepository(
         } catch (e: Exception) {
             ApiResponse(success = false, message = e.message)
         }
+    }
+
+    // --- Leave Management ---
+    suspend fun submitLeaveRequest(request: com.school.asvvm.data.model.LeaveRequest): ApiResponse<Unit> {
+        return try {
+            val ref = firestore.collection("leaves").document()
+            request.id = ref.id
+            request.timestamp = System.currentTimeMillis()
+            ref.set(request).await()
+            ApiResponse(success = true)
+        } catch (e: Exception) {
+            ApiResponse(success = false, message = e.message)
+        }
+    }
+
+    fun listenToLeaveRequests(teacherEmail: String? = null): Flow<List<com.school.asvvm.data.model.LeaveRequest>> = callbackFlow {
+        var query: com.google.firebase.firestore.Query = firestore.collection("leaves")
+        if (teacherEmail != null) {
+            query = query.whereEqualTo("teacherEmail", teacherEmail)
+        }
+        val listener = query.addSnapshotListener { snapshot, _ ->
+            if (snapshot != null) {
+                val requests = snapshot.documents.mapNotNull { it.toObject(com.school.asvvm.data.model.LeaveRequest::class.java) }
+                trySend(requests.sortedByDescending { it.timestamp })
+            }
+        }
+        awaitClose { listener.remove() }
+    }
+
+    suspend fun updateLeaveStatus(requestId: String, status: String): ApiResponse<Unit> {
+        return try {
+            firestore.collection("leaves").document(requestId).update("status", status).await()
+            ApiResponse(success = true)
+        } catch (e: Exception) {
+            ApiResponse(success = false, message = e.message)
+        }
+    }
+
+    // --- Student Authentication ---
+    suspend fun verifyStudentAccess(rollNo: String, accessCode: String): com.school.asvvm.data.model.Student? {
+        val snapshot = firestore.collection("students")
+            .whereEqualTo("rollNo", rollNo)
+            .whereEqualTo("accessCode", accessCode)
+            .get()
+            .await()
+        return snapshot.documents.firstOrNull()?.toObject(com.school.asvvm.data.model.Student::class.java)
     }
 }

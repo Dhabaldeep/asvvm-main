@@ -43,6 +43,10 @@ fun LoginScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var rollNo by remember { mutableStateOf("") }
+    var accessCode by remember { mutableStateOf("") }
+    var isStudentLogin by remember { mutableStateOf(false) }
+    
     val authState by viewModel.authState.collectAsState()
     var visible by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -146,35 +150,74 @@ fun LoginScreen(
                         fontWeight = FontWeight.Medium
                     )
                     
-                    Spacer(Modifier.height(40.dp))
+                    Spacer(Modifier.height(24.dp))
+                    
+                    // Login Type Toggle
+                    TabRow(
+                        selectedTabIndex = if (isStudentLogin) 1 else 0,
+                        containerColor = Color.Transparent,
+                        divider = {}
+                    ) {
+                        Tab(
+                            selected = !isStudentLogin,
+                            onClick = { isStudentLogin = false },
+                            text = { Text("Staff Login", fontWeight = FontWeight.Bold) }
+                        )
+                        Tab(
+                            selected = isStudentLogin,
+                            onClick = { isStudentLogin = true },
+                            text = { Text("Student Login", fontWeight = FontWeight.Bold) }
+                        )
+                    }
 
-                    PremiumTextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = "Email Address",
-                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, autoCorrect = false)
-                    )
+                    Spacer(Modifier.height(24.dp))
 
-                    Spacer(Modifier.height(16.dp))
+                    if (!isStudentLogin) {
+                        PremiumTextField(
+                            value = email,
+                            onValueChange = { email = it },
+                            label = "Email Address",
+                            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, autoCorrect = false)
+                        )
 
-                    PremiumTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = "Password",
-                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
-                        trailingIcon = {
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(
-                                    imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                    contentDescription = "Toggle password visibility",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        },
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrect = false)
-                    )
+                        Spacer(Modifier.height(16.dp))
+
+                        PremiumTextField(
+                            value = password,
+                            onValueChange = { password = it },
+                            label = "Password",
+                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                            trailingIcon = {
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Icon(
+                                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                        contentDescription = "Toggle password visibility",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            },
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrect = false)
+                        )
+                    } else {
+                        PremiumTextField(
+                            value = rollNo,
+                            onValueChange = { rollNo = it },
+                            label = "Roll Number",
+                            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
+                        )
+
+                        Spacer(Modifier.height(16.dp))
+
+                        PremiumTextField(
+                            value = accessCode,
+                            onValueChange = { accessCode = it },
+                            label = "Access Code",
+                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, autoCorrect = false)
+                        )
+                    }
 
                     Spacer(Modifier.height(40.dp))
 
@@ -186,16 +229,25 @@ fun LoginScreen(
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             ModernButton(
-                                onClick = { viewModel.login(email, password) },
+                                onClick = { 
+                                    if (isStudentLogin) {
+                                        viewModel.studentLogin(rollNo, accessCode)
+                                    } else {
+                                        viewModel.login(email, password) 
+                                    }
+                                },
                                 text = "LOGIN"
                             )
-                            OutlinedButton(
-                                onClick = { viewModel.register(email, password) },
-                                modifier = Modifier.fillMaxWidth().height(52.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                            ) {
-                                Text("REGISTER", fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
+                            
+                            if (!isStudentLogin) {
+                                OutlinedButton(
+                                    onClick = { viewModel.register(email, password) },
+                                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                                ) {
+                                    Text("REGISTER", fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
+                                }
                             }
                         }
                     }

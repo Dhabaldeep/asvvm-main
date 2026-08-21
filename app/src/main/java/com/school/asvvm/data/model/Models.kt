@@ -6,7 +6,20 @@ data class Student(
     var name: String = "",
     var className: String = "",
     var guardian: String = "",
+    var accessCode: String = "",
     var lockedTerms: List<String> = emptyList()
+)
+
+data class LeaveRequest(
+    var id: String = "",
+    var teacherName: String = "",
+    var teacherEmail: String = "",
+    var startDate: String = "",
+    var endDate: String = "",
+    var reason: String = "",
+    var type: String = "Casual",
+    var status: String = "Pending",
+    var timestamp: Long = 0L
 )
 
 data class Teacher(

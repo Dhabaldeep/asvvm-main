@@ -50,6 +50,9 @@ class TeacherViewModel @Inject constructor(
         if (it != null) repository.listenToTimetable(it) else kotlinx.coroutines.flow.flowOf(emptyList())
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    private val _leaveRequests = MutableStateFlow<List<com.school.asvvm.data.model.LeaveRequest>>(emptyList())
+    val leaveRequests: StateFlow<List<com.school.asvvm.data.model.LeaveRequest>> = _leaveRequests.asStateFlow()
+
     private val _attendanceRecords = MutableStateFlow<List<com.school.asvvm.data.model.Attendance>>(emptyList())
     val attendanceRecords = _attendanceRecords.asStateFlow()
 
@@ -70,25 +73,33 @@ class TeacherViewModel @Inject constructor(
         profileJob = viewModelScope.launch {
             _isLoading.value = true
             try {
-                repository.listenToTeacherProfile(teacherEmailOrName).collect { profile ->
-                    _isLoading.value = false
-                    if (profile != null) {
-                        val currentClass = _assignedClass.value
-                        _teacherProfile.value = profile
-                        
-                        // If they have classes and current class is null, select the first one
-                        if (profile.assignedClasses.isNotEmpty()) {
-                            if (currentClass == null || !profile.assignedClasses.contains(currentClass)) {
-                                setAssignedClass(profile.assignedClasses.first())
+                launch {
+                    repository.listenToTeacherProfile(teacherEmailOrName).collect { profile ->
+                        _isLoading.value = false
+                        if (profile != null) {
+                            val currentClass = _assignedClass.value
+                            _teacherProfile.value = profile
+                            
+                            // If they have classes and current class is null, select the first one
+                            if (profile.assignedClasses.isNotEmpty()) {
+                                if (currentClass == null || !profile.assignedClasses.contains(currentClass)) {
+                                    setAssignedClass(profile.assignedClasses.first())
+                                }
+                            } else {
+                                if (currentClass != null) {
+                                    _assignedClass.value = null
+                                }
+                                _message.value = "No classes assigned to you"
                             }
                         } else {
-                            if (currentClass != null) {
-                                _assignedClass.value = null
-                            }
-                            _message.value = "No classes assigned to you"
+                            _teacherProfile.value = null
                         }
-                    } else {
-                        _teacherProfile.value = null
+                    }
+                }
+                // Load leave requests
+                launch {
+                    repository.listenToLeaveRequests(teacherEmailOrName).collect { lr ->
+                        _leaveRequests.value = lr
                     }
                 }
             } catch (e: Exception) {
@@ -207,5 +218,27 @@ class TeacherViewModel @Inject constructor(
 
     fun clearMessage() {
         _message.value = null
+    }
+    
+    fun submitLeaveRequest(startDate: String, endDate: String, reason: String, type: String) {
+        val profile = _teacherProfile.value ?: return
+        viewModelScope.launch {
+            _isLoading.value = true
+            val request = com.school.asvvm.data.model.LeaveRequest(
+                teacherName = profile.name,
+                teacherEmail = profile.email,
+                startDate = startDate,
+                endDate = endDate,
+                reason = reason,
+                type = type
+            )
+            val result = repository.submitLeaveRequest(request)
+            if (result.success) {
+                _message.value = "Leave request submitted successfully."
+            } else {
+                _message.value = "Failed to submit leave request: ${result.message}"
+            }
+            _isLoading.value = false
+        }
     }
 }

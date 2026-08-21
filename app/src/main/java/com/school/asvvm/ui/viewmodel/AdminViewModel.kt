@@ -41,6 +41,8 @@ class AdminViewModel @Inject constructor(private val repository: SchoolRepositor
     val allSubjectConfigs: StateFlow<List<com.school.asvvm.data.model.SubjectConfig>> = repository.getAllSubjectConfigs()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val leaveRequests: StateFlow<List<com.school.asvvm.data.model.LeaveRequest>> = repository.listenToLeaveRequests().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val notices: StateFlow<List<com.school.asvvm.data.model.Notice>> = repository.listenToNotices()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -129,10 +131,10 @@ class AdminViewModel @Inject constructor(private val repository: SchoolRepositor
         }
     }
 
-    fun addStudent(name: String, roll: String, className: String, guardian: String) {
+    fun addStudent(name: String, roll: String, className: String, guardian: String, accessCode: String) {
         viewModelScope.launch {
             _isLoading.value = true
-            val res = repository.addStudent(name, roll, className, guardian)
+            val res = repository.addStudent(name, roll, className, guardian, accessCode)
             _message.value = res.message ?: "Student added"
             _isLoading.value = false
         }
@@ -292,5 +294,18 @@ class AdminViewModel @Inject constructor(private val repository: SchoolRepositor
 
     fun clearMessage() {
         _message.value = null
+    }
+    
+    fun updateLeaveStatus(requestId: String, status: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repository.updateLeaveStatus(requestId, status)
+            if (result.success) {
+                _message.value = "Leave request $status."
+            } else {
+                _message.value = "Failed to update leave status: ${result.message}"
+            }
+            _isLoading.value = false
+        }
     }
 }

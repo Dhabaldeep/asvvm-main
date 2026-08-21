@@ -41,6 +41,7 @@ fun TeacherDashboard(
     var showSettingsMenu by remember { mutableStateOf(false) }
     var showNotices by remember { mutableStateOf(false) }
     var showTimetableDialog by remember { mutableStateOf(false) }
+    var showLeaveDialog by remember { mutableStateOf(false) }
     
     val teacherProfile by viewModel.teacherProfile.collectAsState()
     val assignedClass by viewModel.assignedClass.collectAsState()
@@ -249,7 +250,34 @@ fun TeacherDashboard(
                                             }
                                         }
                                     }
-                                    4 -> TeacherProfileView(profile)
+                                    4 -> {
+                                        Column(modifier = Modifier.padding(16.dp)) {
+                                            TeacherProfileView(profile)
+                                            Spacer(Modifier.height(32.dp))
+                                            ModernButton(
+                                                onClick = { showChangePassword = true },
+                                                text = "CHANGE PASSWORD",
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                            Spacer(Modifier.height(16.dp))
+                                            OutlinedButton(
+                                                onClick = { showLeaveDialog = true },
+                                                modifier = Modifier.fillMaxWidth().height(52.dp),
+                                                shape = RoundedCornerShape(12.dp)
+                                            ) {
+                                                Text("APPLY FOR LEAVE", fontWeight = FontWeight.SemiBold)
+                                            }
+                                            Spacer(Modifier.height(16.dp))
+                                            OutlinedButton(
+                                                onClick = onLogout,
+                                                modifier = Modifier.fillMaxWidth().height(52.dp),
+                                                shape = RoundedCornerShape(12.dp),
+                                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                                            ) {
+                                                Text("SIGN OUT", fontWeight = FontWeight.SemiBold)
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -290,6 +318,13 @@ fun TeacherDashboard(
         NoticeBoardDialog(
             notices = notices,
             onDismiss = { showNotices = false }
+        )
+    }
+
+    if (showLeaveDialog) {
+        TeacherLeaveDialog(
+            viewModel = viewModel,
+            onDismiss = { showLeaveDialog = false }
         )
     }
 }

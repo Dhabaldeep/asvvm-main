@@ -36,6 +36,50 @@ import com.school.asvvm.ui.viewmodel.AdminViewModel
 import com.school.asvvm.ui.viewmodel.SubjectTermConfig
 
 @Composable
+fun AddStudentDialog(
+    className: String,
+    onDismiss: () -> Unit,
+    onConfirm: (name: String, roll: String, guardian: String, accessCode: String) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var roll by remember { mutableStateOf("") }
+    var guardian by remember { mutableStateOf("") }
+    var accessCode by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add Student to $className", style = MaterialTheme.typography.titleLarge) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                PremiumTextField(value = name, onValueChange = { name = it }, label = "Student Name", leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) })
+                PremiumTextField(value = roll, onValueChange = { roll = it }, label = "Roll Number", leadingIcon = { Icon(Icons.Default.Numbers, contentDescription = null) })
+                PremiumTextField(value = guardian, onValueChange = { guardian = it }, label = "Guardian Name (Optional)", leadingIcon = { Icon(Icons.Default.FamilyRestroom, contentDescription = null) })
+                PremiumTextField(
+                    value = accessCode, 
+                    onValueChange = { accessCode = it }, 
+                    label = "Parent Access Code", 
+                    leadingIcon = { Icon(Icons.Default.VpnKey, contentDescription = null) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+            }
+        },
+        confirmButton = {
+            ModernButton(
+                onClick = {
+                    if (name.isNotBlank() && roll.isNotBlank() && accessCode.isNotBlank()) {
+                        onConfirm(name, roll, guardian, accessCode)
+                    }
+                },
+                text = "Add Student"
+            )
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
+
+@Composable
 fun AdminDashboard(
     viewModel: AdminViewModel,
     onLogout: () -> Unit,
@@ -169,10 +213,11 @@ fun AdminDashboard(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             // Main Tabs
-            TabRow(
+            ScrollableTabRow(
                 selectedTabIndex = selectedTabIndex,
                 containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.primary
+                contentColor = MaterialTheme.colorScheme.primary,
+                edgePadding = 8.dp
             ) {
                 Tab(
                     selected = selectedTabIndex == 0,
@@ -198,6 +243,11 @@ fun AdminDashboard(
                     selected = selectedTabIndex == 4,
                     onClick = { selectedTabIndex = 4 },
                     text = { Text("Timetable", fontWeight = FontWeight.Bold) }
+                )
+                Tab(
+                    selected = selectedTabIndex == 5,
+                    onClick = { selectedTabIndex = 5 },
+                    text = { Text("Leaves", fontWeight = FontWeight.Bold) }
                 )
             }
 
@@ -321,6 +371,8 @@ fun AdminDashboard(
                             )
                         } else if (selectedTabIndex == 4) {
                             AdminTimetableView(viewModel, selectedClass)
+                        } else if (selectedTabIndex == 5) {
+                            AdminLeaveView(viewModel)
                         } else {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
@@ -411,8 +463,8 @@ fun AdminDashboard(
         AddStudentDialog(
             className = selectedClass,
             onDismiss = { showAddDialog = false },
-            onConfirm = { name, roll, guardian ->
-                viewModel.addStudent(name, roll, selectedClass, guardian)
+            onConfirm = { name, roll, guardian, accessCode ->
+                viewModel.addStudent(name, roll, selectedClass, guardian, accessCode)
                 showAddDialog = false
             }
         )

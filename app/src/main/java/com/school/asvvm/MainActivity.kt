@@ -190,16 +190,20 @@ fun AppNavigation() {
                 val viewModel: AuthViewModel = hiltViewModel()
                 LoginScreen(
                     onLoginSuccess = { role, u ->
-                    if (role == "Admin") {
-                        navController.navigate("admin_dashboard") {
-                            popUpTo("login") { inclusive = true }
+                        if (role == "Admin") {
+                            navController.navigate("admin_dashboard") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        } else if (role == "Student") {
+                            navController.navigate("student_dashboard/$u") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        } else {
+                            navController.navigate("teacher_dashboard/$u") {
+                                popUpTo("login") { inclusive = true }
+                            }
                         }
-                    } else {
-                        navController.navigate("teacher_dashboard/$u") {
-                            popUpTo("login") { inclusive = true }
-                        }
-                    }
-                }, viewModel = viewModel)
+                    }, viewModel = viewModel)
             }
             composable("admin_dashboard") {
                 val viewModel: AdminViewModel = hiltViewModel()
@@ -217,20 +221,40 @@ fun AppNavigation() {
                 )
             }
             composable("teacher_dashboard/{username}") { backStackEntry ->
-                val username = backStackEntry.arguments?.getString("username") ?: ""
+                val username = backStackEntry.arguments?.getString("username") ?: "Teacher"
                 val viewModel: TeacherViewModel = hiltViewModel()
-                val authViewModel: AuthViewModel = hiltViewModel()
+                val authViewModel: AuthViewModel = hiltViewModel(backStackEntry)
+                
                 TeacherDashboard(
-                    teacherName = username, 
+                    teacherName = username,
                     viewModel = viewModel,
                     onLogout = {
-                        com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
                         authViewModel.logout()
                         navController.navigate("login") {
                             popUpTo(0) { inclusive = true }
                         }
                     },
                     onCheckUpdate = onCheckUpdate
+                )
+            }
+            
+            composable("student_dashboard/{username}") { backStackEntry ->
+                val username = backStackEntry.arguments?.getString("username") ?: "Student"
+                val viewModel: com.school.asvvm.ui.viewmodel.StudentViewModel = hiltViewModel()
+                
+                // We fetch the full student info using the ID (username here is the ID)
+                // For simplicity, we create a stub student to pass in. The ViewModel should really fetch it by ID.
+                val student = com.school.asvvm.data.model.Student(id = username, name = "Student")
+                
+                com.school.asvvm.ui.screens.StudentDashboard(
+                    student = student,
+                    viewModel = viewModel,
+                    onLogout = {
+                        com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
                 )
             }
         }
