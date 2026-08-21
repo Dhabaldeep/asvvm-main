@@ -46,6 +46,10 @@ class TeacherViewModel @Inject constructor(
 
     val notices = repository.listenToNotices().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
+    val timetable: StateFlow<List<com.school.asvvm.data.model.TimetablePeriod>> = _assignedClass.flatMapLatest {
+        if (it != null) repository.listenToTimetable(it) else kotlinx.coroutines.flow.flowOf(emptyList())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     private val _attendanceRecords = MutableStateFlow<List<com.school.asvvm.data.model.Attendance>>(emptyList())
     val attendanceRecords = _attendanceRecords.asStateFlow()
 

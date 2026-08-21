@@ -473,4 +473,38 @@ class SchoolRepository(
             ApiResponse(success = false, message = e.message)
         }
     }
+
+    // Timetable
+    fun listenToTimetable(className: String): Flow<List<com.school.asvvm.data.model.TimetablePeriod>> = callbackFlow {
+        val listener = firestore.collection("timetables")
+            .whereEqualTo("className", className)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
+                val periods = snapshot?.toObjects(com.school.asvvm.data.model.TimetablePeriod::class.java) ?: emptyList()
+                trySend(periods)
+            }
+        awaitClose { listener.remove() }
+    }
+
+    suspend fun saveTimetablePeriod(period: com.school.asvvm.data.model.TimetablePeriod): ApiResponse<Unit> {
+        return try {
+            if (period.id.isBlank()) period.id = java.util.UUID.randomUUID().toString()
+            firestore.collection("timetables").document(period.id).set(period).await()
+            ApiResponse(success = true)
+        } catch (e: Exception) {
+            ApiResponse(success = false, message = e.message)
+        }
+    }
+    
+    suspend fun deleteTimetablePeriod(periodId: String): ApiResponse<Unit> {
+        return try {
+            firestore.collection("timetables").document(periodId).delete().await()
+            ApiResponse(success = true)
+        } catch (e: Exception) {
+            ApiResponse(success = false, message = e.message)
+        }
+    }
 }

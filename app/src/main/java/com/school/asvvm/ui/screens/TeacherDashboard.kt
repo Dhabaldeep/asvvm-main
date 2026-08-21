@@ -40,6 +40,7 @@ fun TeacherDashboard(
     var showChangePassword by remember { mutableStateOf(false) }
     var showSettingsMenu by remember { mutableStateOf(false) }
     var showNotices by remember { mutableStateOf(false) }
+    var showTimetableDialog by remember { mutableStateOf(false) }
     
     val teacherProfile by viewModel.teacherProfile.collectAsState()
     val assignedClass by viewModel.assignedClass.collectAsState()
@@ -154,6 +155,17 @@ fun TeacherDashboard(
                     label = { Text("Profile") }
                 )
             }
+        },
+        floatingActionButton = {
+            if (assignedClass != null && teacherProfile != null) {
+                ExtendedFloatingActionButton(
+                    onClick = { showTimetableDialog = true },
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary,
+                    icon = { Icon(Icons.Default.Schedule, contentDescription = null) },
+                    text = { Text("Timetable") }
+                )
+            }
         }
     ) { padding ->
         Box(
@@ -259,10 +271,18 @@ fun TeacherDashboard(
         ChangePasswordDialog(
             username = teacherName,
             onDismiss = { showChangePassword = false },
-            onConfirm = { old, new ->
-                viewModel.changePassword(teacherName, old, new)
+            onConfirm = { current, newPwd ->
+                viewModel.changePassword(teacherName, current, newPwd)
                 showChangePassword = false
             }
+        )
+    }
+
+    if (showTimetableDialog && assignedClass != null) {
+        TeacherTimetableDialog(
+            viewModel = viewModel,
+            className = assignedClass!!,
+            onDismiss = { showTimetableDialog = false }
         )
     }
 

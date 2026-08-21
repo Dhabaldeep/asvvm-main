@@ -55,6 +55,7 @@ fun AdminDashboard(
     var showSettingsMenu by remember { mutableStateOf(false) }
     var showNotices by remember { mutableStateOf(false) }
     var showCreateNotice by remember { mutableStateOf(false) }
+    var showAddPeriodDialog by remember { mutableStateOf(false) }
     
     val students by viewModel.students.collectAsState()
     val teachers by viewModel.teachers.collectAsState()
@@ -150,6 +151,14 @@ fun AdminDashboard(
                     icon = { Icon(Icons.Default.Campaign, contentDescription = null) },
                     text = { Text("Broadcast Notice") }
                 )
+            } else if (selectedTabIndex == 4) {
+                ExtendedFloatingActionButton(
+                    onClick = { showAddPeriodDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    icon = { Icon(Icons.Default.Schedule, contentDescription = null) },
+                    text = { Text("Add Period") }
+                )
             }
         }
     ) { padding ->
@@ -185,9 +194,14 @@ fun AdminDashboard(
                     onClick = { selectedTabIndex = 3 },
                     text = { Text("Attendance", fontWeight = FontWeight.Bold) }
                 )
+                Tab(
+                    selected = selectedTabIndex == 4,
+                    onClick = { selectedTabIndex = 4 },
+                    text = { Text("Timetable", fontWeight = FontWeight.Bold) }
+                )
             }
 
-            if (selectedTabIndex == 0 || selectedTabIndex == 2 || selectedTabIndex == 3) {
+            if (selectedTabIndex == 0 || selectedTabIndex == 2 || selectedTabIndex == 3 || selectedTabIndex == 4) {
                 // Secondary Class Tabs
                 ScrollableTabRow(
                     selectedTabIndex = SchoolClass.values().indexOfFirst { it.value == selectedClass },
@@ -305,6 +319,8 @@ fun AdminDashboard(
                                 className = selectedClass,
                                 date = today
                             )
+                        } else if (selectedTabIndex == 4) {
+                            AdminTimetableView(viewModel, selectedClass)
                         } else {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
@@ -524,6 +540,14 @@ fun AdminDashboard(
             dismissButton = {
                 TextButton(onClick = { teacherToDelete = null }) { Text("CANCEL") }
             }
+        )
+    }
+
+    if (showAddPeriodDialog) {
+        AddTimetablePeriodDialog(
+            className = selectedClass,
+            viewModel = viewModel,
+            onDismiss = { showAddPeriodDialog = false }
         )
     }
 }

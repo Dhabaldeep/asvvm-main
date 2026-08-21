@@ -67,6 +67,44 @@ class AdminViewModel @Inject constructor(private val repository: SchoolRepositor
         }
     }
 
+    val timetable: StateFlow<List<com.school.asvvm.data.model.TimetablePeriod>> = _selectedClass.flatMapLatest {
+        repository.listenToTimetable(it)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun saveTimetablePeriod(className: String, dayOfWeek: String, startTime: String, endTime: String, subject: String, teacherName: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val period = com.school.asvvm.data.model.TimetablePeriod(
+                className = className,
+                dayOfWeek = dayOfWeek,
+                startTime = startTime,
+                endTime = endTime,
+                subject = subject,
+                teacherName = teacherName
+            )
+            val res = repository.saveTimetablePeriod(period)
+            if (res.success) {
+                _message.value = "Period saved successfully"
+            } else {
+                _message.value = "Failed to save period"
+            }
+            _isLoading.value = false
+        }
+    }
+
+    fun deleteTimetablePeriod(periodId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val res = repository.deleteTimetablePeriod(periodId)
+            if (res.success) {
+                _message.value = "Period deleted"
+            } else {
+                _message.value = "Failed to delete period"
+            }
+            _isLoading.value = false
+        }
+    }
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 

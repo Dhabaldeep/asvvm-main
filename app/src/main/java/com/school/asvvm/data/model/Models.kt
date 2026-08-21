@@ -101,3 +101,13 @@ fun getSubjectsForClass(className: String): List<String> {
         else -> secondarySubjects
     }
 }
+
+data class TimetablePeriod(
+    var id: String = "",
+    var className: String = "",
+    var dayOfWeek: String = "", // e.g., "Monday"
+    var startTime: String = "", // e.g., "10:00 AM"
+    var endTime: String = "",   // e.g., "10:45 AM"
+    var subject: String = "",
+    var teacherName: String = ""
+)
