@@ -35,15 +35,21 @@ class StudentViewModel @Inject constructor(
     val notices: StateFlow<List<Notice>> = schoolRepository.listenToNotices()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun initialize(student: Student) {
-        _studentProfile.value = student
+    fun initialize(studentId: String) {
         viewModelScope.launch {
             _isLoading.value = true
             
-            // Fetch timetable
-            schoolRepository.listenToTimetable(student.className).collect { periods ->
-                _timetable.value = periods
+            val student = schoolRepository.getStudentById(studentId)
+            if (student != null) {
+                _studentProfile.value = student
+                // Fetch timetable
+                schoolRepository.listenToTimetable(student.className).collect { periods ->
+                    _timetable.value = periods
+                }
+            } else {
+                _message.value = "Failed to load student profile."
             }
+            _isLoading.value = false
         }
         
         // Fetch marks and attendance (In a real app this would have dedicated endpoints for a specific student)

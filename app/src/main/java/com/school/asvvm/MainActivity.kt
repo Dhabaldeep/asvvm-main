@@ -242,12 +242,8 @@ fun AppNavigation() {
                 val username = backStackEntry.arguments?.getString("username") ?: "Student"
                 val viewModel: com.school.asvvm.ui.viewmodel.StudentViewModel = hiltViewModel()
                 
-                // We fetch the full student info using the ID (username here is the ID)
-                // For simplicity, we create a stub student to pass in. The ViewModel should really fetch it by ID.
-                val student = com.school.asvvm.data.model.Student(id = username, name = "Student")
-                
                 com.school.asvvm.ui.screens.StudentDashboard(
-                    student = student,
+                    studentId = username,
                     viewModel = viewModel,
                     onLogout = {
                         com.google.firebase.auth.FirebaseAuth.getInstance().signOut()

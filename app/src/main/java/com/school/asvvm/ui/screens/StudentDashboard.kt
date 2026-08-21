@@ -23,7 +23,7 @@ import com.school.asvvm.ui.viewmodel.StudentViewModel
 
 @Composable
 fun StudentDashboard(
-    student: Student,
+    studentId: String,
     viewModel: StudentViewModel,
     onLogout: () -> Unit
 ) {
@@ -34,15 +34,17 @@ fun StudentDashboard(
     val timetable by viewModel.timetable.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    LaunchedEffect(student) {
-        viewModel.initialize(student)
+    val studentProfile by viewModel.studentProfile.collectAsState()
+
+    LaunchedEffect(studentId) {
+        viewModel.initialize(studentId)
     }
 
     Scaffold(
         topBar = {
             SchoolTopBar(
                 title = "Student Portal",
-                subtitle = student.name,
+                subtitle = studentProfile?.name ?: "Loading...",
                 onLogout = onLogout,
                 actions = {
                     IconButton(onClick = { showNotices = true }) {
@@ -83,13 +85,13 @@ fun StudentDashboard(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            if (isLoading) {
+            if (isLoading || studentProfile == null) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             } else {
                 when (selectedTab) {
-                    0 -> StudentOverviewTab(student)
+                    0 -> StudentOverviewTab(studentProfile!!)
                     1 -> StudentTimetableTab(timetable)
                     2 -> StudentReportTab() // Placeholder
                 }

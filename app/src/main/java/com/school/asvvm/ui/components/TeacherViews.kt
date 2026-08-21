@@ -10,6 +10,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -154,7 +156,8 @@ fun TeacherStudentListView(students: List<Student>) {
 
 @Composable
 fun TeacherGradingView(students: List<Student>, className: String, viewModel: TeacherViewModel) {
-    var selectedStudent by remember { mutableStateOf<Student?>(null) }
+    var selectedStudentId by remember { mutableStateOf<String?>(null) }
+    val selectedStudent = students.find { it.id == selectedStudentId } ?: students.firstOrNull()
     var selectedTerm by remember { mutableStateOf(com.school.asvvm.data.model.ExamTerm.FIRST_HALF) }
     val marks by viewModel.marks.collectAsState()
     val subjectConfigs by viewModel.subjectConfigs.collectAsState()
@@ -189,7 +192,7 @@ fun TeacherGradingView(students: List<Student>, className: String, viewModel: Te
                 Tab(
                     selected = selectedStudent == student,
                     onClick = { 
-                        selectedStudent = student
+                        selectedStudentId = student.id
                     },
                     text = { 
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -322,7 +325,8 @@ fun TeacherGradingView(students: List<Student>, className: String, viewModel: Te
                                         }
                                     },
                                     label = "Written Marks (Max ${config.maxWritten})",
-                                    leadingIcon = { Icon(Icons.Default.DriveFileRenameOutline, contentDescription = null, tint = subjectColor.copy(alpha = 0.6f)) }
+                                    leadingIcon = { Icon(Icons.Default.DriveFileRenameOutline, contentDescription = null, tint = subjectColor.copy(alpha = 0.6f)) },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                 )
                             } else {
                                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -337,7 +341,8 @@ fun TeacherGradingView(students: List<Student>, className: String, viewModel: Te
                                                 }
                                             },
                                             label = "Written (Max ${config.maxWritten})",
-                                            leadingIcon = { Icon(Icons.Default.DriveFileRenameOutline, contentDescription = null, tint = subjectColor.copy(alpha = 0.6f)) }
+                                            leadingIcon = { Icon(Icons.Default.DriveFileRenameOutline, contentDescription = null, tint = subjectColor.copy(alpha = 0.6f)) },
+                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                         )
                                     }
                                     Box(modifier = Modifier.weight(1f)) {
@@ -351,7 +356,8 @@ fun TeacherGradingView(students: List<Student>, className: String, viewModel: Te
                                                 }
                                             },
                                             label = "Oral (Max ${config.maxOral})",
-                                            leadingIcon = { Icon(Icons.Default.Mic, contentDescription = null, tint = subjectColor.copy(alpha = 0.6f)) }
+                                            leadingIcon = { Icon(Icons.Default.Mic, contentDescription = null, tint = subjectColor.copy(alpha = 0.6f)) },
+                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                         )
                                     }
                                 }

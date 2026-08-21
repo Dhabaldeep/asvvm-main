@@ -110,6 +110,15 @@ class SchoolRepository(
         // Intentionally empty: Real-time queries handle refresh
     }
 
+    suspend fun getStudentById(studentId: String): com.school.asvvm.data.model.Student? {
+        return try {
+            val snapshot = firestore.collection("students").document(studentId).get().await()
+            snapshot.toObject(com.school.asvvm.data.model.Student::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     suspend fun addStudent(name: String, roll: String, className: String, guardian: String, accessCode: String): ApiResponse<Unit> {
         return try {
             val ref = firestore.collection("students").document()
