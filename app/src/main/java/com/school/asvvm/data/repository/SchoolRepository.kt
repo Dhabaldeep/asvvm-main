@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.UUID
+import android.util.Log
 
 class SchoolRepository(
     private val auth: FirebaseAuth,
@@ -338,7 +339,7 @@ class SchoolRepository(
                     trySend(emptyList())
                     return@addSnapshotListener
                 }
-                val configs = snapshot?.toObjects<SubjectConfig>() ?: emptyList()
+                val configs = snapshot?.safeToObjects(SubjectConfig::class.java) ?: emptyList()
                 trySend(configs)
             }
         awaitClose { listener.remove() }
@@ -374,7 +375,7 @@ class SchoolRepository(
                     trySend(emptyList())
                     return@addSnapshotListener
                 }
-                val marks = snapshot?.toObjects<Mark>() ?: emptyList()
+                val marks = snapshot?.safeToObjects(Mark::class.java) ?: emptyList()
                 trySend(marks)
             }
         awaitClose { listener.remove() }
@@ -388,7 +389,7 @@ class SchoolRepository(
                     trySend(emptyList())
                     return@addSnapshotListener
                 }
-                val marks = snapshot?.toObjects<Mark>() ?: emptyList()
+                val marks = snapshot?.safeToObjects(Mark::class.java) ?: emptyList()
                 trySend(marks)
             }
         awaitClose { listener.remove() }
@@ -436,7 +437,7 @@ class SchoolRepository(
                     trySend(emptyList())
                     return@addSnapshotListener
                 }
-                val records = snapshot?.toObjects(Attendance::class.java) ?: emptyList()
+                val records = snapshot?.safeToObjects(Attendance::class.java) ?: emptyList()
                 trySend(records)
             }
         awaitClose { listener.remove() }
@@ -466,7 +467,7 @@ class SchoolRepository(
                     trySend(emptyList())
                     return@addSnapshotListener
                 }
-                val notices = snapshot?.toObjects(Notice::class.java) ?: emptyList()
+                val notices = snapshot?.safeToObjects(Notice::class.java) ?: emptyList()
                 trySend(notices)
             }
         awaitClose { listener.remove() }
@@ -491,7 +492,7 @@ class SchoolRepository(
                     trySend(emptyList())
                     return@addSnapshotListener
                 }
-                val periods = snapshot?.toObjects(com.school.asvvm.data.model.TimetablePeriod::class.java) ?: emptyList()
+                val periods = snapshot?.safeToObjects(com.school.asvvm.data.model.TimetablePeriod::class.java) ?: emptyList()
                 trySend(periods)
             }
         awaitClose { listener.remove() }
@@ -536,7 +537,7 @@ class SchoolRepository(
         }
         val listener = query.addSnapshotListener { snapshot, _ ->
             if (snapshot != null) {
-                val requests = snapshot.documents.mapNotNull { it.toObject(com.school.asvvm.data.model.LeaveRequest::class.java) }
+                val requests = snapshot.documents.mapNotNull { it.safeToObject(com.school.asvvm.data.model.LeaveRequest::class.java) }
                 trySend(requests.sortedByDescending { it.timestamp })
             }
         }
@@ -590,4 +591,17 @@ class SchoolRepository(
         phone = this.phone ?: "",
         gender = this.gender ?: ""
     )
+
+    private fun <T> com.google.firebase.firestore.DocumentSnapshot.safeToObject(clazz: Class<T>): T? {
+        return try {
+            this.toObject(clazz)
+        } catch (e: Exception) {
+            Log.e("SchoolRepository", "Error mapping document ${this.id} to ${clazz.simpleName}", e)
+            null
+        }
+    }
+
+    private fun <T> com.google.firebase.firestore.QuerySnapshot.safeToObjects(clazz: Class<T>): List<T> {
+        return this.documents.mapNotNull { it.safeToObject(clazz) }
+    }
 }
