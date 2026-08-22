@@ -19,6 +19,7 @@ import com.school.asvvm.data.model.Student
 import com.school.asvvm.ui.components.ModernButton
 import com.school.asvvm.ui.components.NoticeBoardDialog
 import com.school.asvvm.ui.components.SchoolTopBar
+import com.school.asvvm.ui.theme.*
 import com.school.asvvm.ui.viewmodel.StudentViewModel
 
 @Composable
@@ -83,17 +84,17 @@ fun StudentDashboard(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.surfaceContainerLowest)
         ) {
             if (isLoading || studentProfile == null) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary, strokeWidth = 3.dp)
                 }
             } else {
                 when (selectedTab) {
                     0 -> StudentOverviewTab(studentProfile!!)
                     1 -> StudentTimetableTab(timetable)
-                    2 -> StudentReportTab() // Placeholder
+                    2 -> StudentReportTab()
                 }
             }
         }
@@ -109,23 +110,116 @@ fun StudentDashboard(
 
 @Composable
 fun StudentOverviewTab(student: Student) {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Profile Summary", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text("Name: ${student.name}")
-                Text("Roll No: ${student.rollNo}")
-                Text("Class: ${student.className}")
-                Text("Guardian: ${student.guardian}")
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Hero Student Profile Card
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.primaryContainer
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.15f),
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Default.School, 
+                                    contentDescription = null, 
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(26.dp)
+                                )
+                            }
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                "Welcome back,", 
+                                style = MaterialTheme.typography.labelMedium, 
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                            )
+                            Text(
+                                student.name, 
+                                style = MaterialTheme.typography.headlineLarge, 
+                                fontWeight = FontWeight.ExtraBold, 
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+                Divider(color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.15f))
+                Spacer(Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    com.school.asvvm.ui.components.M3StatusChip(
+                        text = "Class: ${student.className}",
+                        icon = Icons.Default.Class,
+                        containerColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.15f),
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    com.school.asvvm.ui.components.M3StatusChip(
+                        text = "Roll No: ${student.rollNo}",
+                        icon = Icons.Default.Numbers,
+                        containerColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.15f),
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
         }
         
-        Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Attendance", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        // Guardian & Status Info Card
+        com.school.asvvm.ui.components.ModernCard(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ) {
+            Column(modifier = Modifier.padding(4.dp)) {
+                Text(
+                    "Student Details", 
+                    style = MaterialTheme.typography.titleMedium, 
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Guardian Name", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(student.guardian.ifBlank { "Not Specified" }, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                }
                 Spacer(Modifier.height(8.dp))
-                Text("Your attendance functionality is being setup.")
+                Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Account Status", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    com.school.asvvm.ui.components.M3StatusChip(
+                        text = if (student.lockedTerms.isEmpty()) "Active" else "Locked (${student.lockedTerms.size} terms)",
+                        icon = if (student.lockedTerms.isEmpty()) Icons.Default.CheckCircle else Icons.Default.Lock,
+                        containerColor = if (student.lockedTerms.isEmpty()) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.errorContainer,
+                        contentColor = if (student.lockedTerms.isEmpty()) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
             }
         }
     }
@@ -134,26 +228,66 @@ fun StudentOverviewTab(student: Student) {
 @Composable
 fun StudentTimetableTab(timetable: List<com.school.asvvm.data.model.TimetablePeriod>) {
     if (timetable.isEmpty()) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("No timetable available for your class.")
-        }
+        com.school.asvvm.ui.components.EmptyStateView(
+            icon = Icons.Default.Schedule,
+            title = "No Timetable Found",
+            subtitle = "Your class schedule has not been published yet."
+        )
     } else {
-        LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             items(timetable.groupBy { it.dayOfWeek }.toList()) { (day, periods) ->
-                Text(day, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                periods.sortedBy { it.startTime }.forEach { period ->
-                    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
-                        Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Column {
-                                Text(period.subject, fontWeight = FontWeight.Bold)
-                                Text(period.teacherName, style = MaterialTheme.typography.bodySmall)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    com.school.asvvm.ui.components.M3StatusChip(
+                        text = day,
+                        icon = Icons.Default.CalendarToday,
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                    
+                    periods.sortedBy { it.startTime }.forEach { period ->
+                        val colors = listOf(SubjectMath, SubjectScience, SubjectEnglish, SubjectArt, SubjectHistory)
+                        val subjectColor = colors[period.subject.hashCode().let { if (it < 0) -it else it } % colors.size]
+
+                        com.school.asvvm.ui.components.ModernCard(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    com.school.asvvm.ui.components.ColoredIconBox(
+                                        icon = Icons.Default.Book,
+                                        color = subjectColor
+                                    )
+                                    Spacer(Modifier.width(12.dp))
+                                    Column {
+                                        Text(
+                                            period.subject, 
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            period.teacherName, 
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                                com.school.asvvm.ui.components.M3StatusChip(
+                                    text = "${period.startTime} - ${period.endTime}",
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    contentColor = MaterialTheme.colorScheme.onSurface
+                                )
                             }
-                            Text("${period.startTime} - ${period.endTime}", style = MaterialTheme.typography.labelMedium)
                         }
                     }
-                    Spacer(Modifier.height(4.dp))
                 }
-                Spacer(Modifier.height(8.dp))
             }
         }
     }
@@ -161,7 +295,9 @@ fun StudentTimetableTab(timetable: List<com.school.asvvm.data.model.TimetablePer
 
 @Composable
 fun StudentReportTab() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Report cards will appear here.")
-    }
+    com.school.asvvm.ui.components.EmptyStateView(
+        icon = Icons.Default.Assessment,
+        title = "Report Cards",
+        subtitle = "Published terminal report cards will appear here."
+    )
 }

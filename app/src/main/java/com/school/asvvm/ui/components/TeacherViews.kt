@@ -30,24 +30,25 @@ fun TeacherClassSelector(classes: List<String>, selectedClass: String?, onClassS
     ScrollableTabRow(
         selectedTabIndex = classes.indexOf(selectedClass).coerceAtLeast(0),
         edgePadding = 16.dp,
-        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         divider = {}
     ) {
         classes.forEach { cls ->
+            val isSelected = selectedClass == cls
             Tab(
-                selected = selectedClass == cls,
+                selected = isSelected,
                 onClick = { onClassSelected(cls) },
                 text = { 
                     Surface(
-                        color = if (selectedClass == cls) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-                        shape = RoundedCornerShape(12.dp)
+                        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                        shape = RoundedCornerShape(50)
                     ) {
                         Text(
                             cls, 
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = if (selectedClass == cls) FontWeight.Bold else FontWeight.Medium,
-                            color = if (selectedClass == cls) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                         ) 
                     }
                 }
@@ -61,37 +62,58 @@ fun TeacherClassSelector(classes: List<String>, selectedClass: String?, onClassS
 fun TeacherProfileView(teacher: com.school.asvvm.data.model.Teacher?) {
     if (teacher == null) return
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(12.dp))
         Surface(
-            modifier = Modifier.size(120.dp),
-            shape = RoundedCornerShape(30.dp),
+            modifier = Modifier.size(108.dp),
+            shape = RoundedCornerShape(28.dp),
             color = MaterialTheme.colorScheme.primaryContainer
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     Icons.Default.AccountCircle, 
                     contentDescription = null, 
-                    modifier = Modifier.size(80.dp), 
-                    tint = MaterialTheme.colorScheme.primary
+                    modifier = Modifier.size(72.dp), 
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
         }
+        Spacer(Modifier.height(16.dp))
+        Text(
+            teacher.name, 
+            style = MaterialTheme.typography.headlineLarge, 
+            fontWeight = FontWeight.ExtraBold, 
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(4.dp))
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.secondaryContainer
+        ) {
+            Text(
+                teacher.email, 
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                style = MaterialTheme.typography.labelMedium, 
+                color = MaterialTheme.colorScheme.onSecondaryContainer, 
+                fontWeight = FontWeight.Bold
+            )
+        }
+        
         Spacer(Modifier.height(24.dp))
-        Text(teacher.name, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-        Text(teacher.email, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Normal)
         
-        Spacer(Modifier.height(32.dp))
-        
-        ModernCard(modifier = Modifier.fillMaxWidth()) {
+        ModernCard(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ) {
             Column(modifier = Modifier.padding(8.dp).fillMaxWidth()) {
                 ProfileInfoRow("Phone Number", teacher.phone.takeIf { it.isNotBlank() } ?: "Not Set")
-                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f), modifier = Modifier.padding(vertical = 12.dp))
+                Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), modifier = Modifier.padding(vertical = 12.dp))
                 ProfileInfoRow("Gender Identity", teacher.gender.takeIf { it.isNotBlank() } ?: "Not Set")
-                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f), modifier = Modifier.padding(vertical = 12.dp))
+                Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), modifier = Modifier.padding(vertical = 12.dp))
                 val safeClasses = teacher.assignedClasses ?: emptyList()
                 ProfileInfoRow("Managed Classes", safeClasses.size.toString())
             }
@@ -126,31 +148,43 @@ fun TeacherStudentListView(students: List<Student>) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(students) { student ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp, horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+            ModernCard(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                onClick = {}
             ) {
-                val colors = listOf(SubjectMath, SubjectScience, SubjectEnglish, SubjectArt, SubjectHistory)
-                val color = colors[student.rollNo.hashCode().let { if (it < 0) -it else it } % colors.size]
-                
-                ColoredIconBox(
-                    icon = Icons.Default.Person,
-                    color = color
-                )
-                
-                Spacer(Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(student.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                    Text("Roll No: ${student.rollNo} • Guardian: ${student.guardian}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val colors = listOf(SubjectMath, SubjectScience, SubjectEnglish, SubjectArt, SubjectHistory)
+                    val color = colors[student.rollNo.hashCode().let { if (it < 0) -it else it } % colors.size]
+                    
+                    ColoredIconBox(
+                        icon = Icons.Default.Person,
+                        color = color
+                    )
+                    
+                    Spacer(Modifier.width(14.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            student.name, 
+                            style = MaterialTheme.typography.titleMedium, 
+                            fontWeight = FontWeight.Bold, 
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            "Roll No: ${student.rollNo} • Guardian: ${student.guardian.ifBlank { "N/A" }}", 
+                            style = MaterialTheme.typography.bodySmall, 
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline)
                 }
-                Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline)
             }
-            Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
         }
     }
 }

@@ -210,68 +210,75 @@ fun AdminDashboard(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.surfaceContainerLowest)
         ) {
-            // Main Tabs
+            // Main Expressive Navigation Tabs
             ScrollableTabRow(
                 selectedTabIndex = selectedTabIndex,
-                containerColor = MaterialTheme.colorScheme.surface,
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 contentColor = MaterialTheme.colorScheme.primary,
-                edgePadding = 8.dp
+                edgePadding = 12.dp,
+                divider = {}
             ) {
-                Tab(
-                    selected = selectedTabIndex == 0,
-                    onClick = { selectedTabIndex = 0 },
-                    text = { Text("Students", fontWeight = FontWeight.Bold) }
-                )
-                Tab(
-                    selected = selectedTabIndex == 1,
-                    onClick = { selectedTabIndex = 1 },
-                    text = { Text("Teachers", fontWeight = FontWeight.Bold) }
-                )
-                Tab(
-                    selected = selectedTabIndex == 2,
-                    onClick = { selectedTabIndex = 2 },
-                    text = { Text("Subjects", fontWeight = FontWeight.Bold) }
-                )
-                Tab(
-                    selected = selectedTabIndex == 3,
-                    onClick = { selectedTabIndex = 3 },
-                    text = { Text("Attendance", fontWeight = FontWeight.Bold) }
-                )
-                Tab(
-                    selected = selectedTabIndex == 4,
-                    onClick = { selectedTabIndex = 4 },
-                    text = { Text("Timetable", fontWeight = FontWeight.Bold) }
-                )
-                Tab(
-                    selected = selectedTabIndex == 5,
-                    onClick = { selectedTabIndex = 5 },
-                    text = { Text("Leaves", fontWeight = FontWeight.Bold) }
-                )
+                val tabTitles = listOf("Students", "Teachers", "Subjects", "Attendance", "Timetable", "Leaves")
+                val tabIcons = listOf(Icons.Default.Group, Icons.Default.School, Icons.Default.Book, Icons.Default.CheckCircle, Icons.Default.Schedule, Icons.Default.EventNote)
+                
+                tabTitles.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTabIndex == index,
+                        onClick = { selectedTabIndex = index },
+                        text = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Icon(
+                                    tabIcons[index], 
+                                    contentDescription = null, 
+                                    modifier = Modifier.size(16.dp),
+                                    tint = if (selectedTabIndex == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    title, 
+                                    fontWeight = if (selectedTabIndex == index) FontWeight.ExtraBold else FontWeight.Medium,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = if (selectedTabIndex == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    )
+                }
             }
 
             if (selectedTabIndex == 0 || selectedTabIndex == 2 || selectedTabIndex == 3 || selectedTabIndex == 4) {
-                // Secondary Class Tabs
+                // Secondary Expressive Class Selector Pills
                 ScrollableTabRow(
                     selectedTabIndex = SchoolClass.values().indexOfFirst { it.value == selectedClass },
                     edgePadding = 16.dp,
-                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                     divider = {}
                 ) {
                     SchoolClass.values().forEach { cls ->
+                        val isSelected = selectedClass == cls.value
                         Tab(
-                            selected = selectedClass == cls.value,
+                            selected = isSelected,
                             onClick = { 
                                 selectedClass = cls.value
                                 viewModel.selectClass(cls.value)
                             },
                             text = { 
-                                Text(
-                                    cls.value, 
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = if (selectedClass == cls.value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                ) 
+                                Surface(
+                                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                                    shape = RoundedCornerShape(50)
+                                ) {
+                                    Text(
+                                        cls.value, 
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
+                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         )
                     }
@@ -280,7 +287,7 @@ fun AdminDashboard(
 
             Box(modifier = Modifier.fillMaxSize().pullRefresh(pullRefreshState)) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    // Dashboard Analytics
+                    // Dashboard Hero Analytics (M3StatCards)
                     if (selectedTabIndex != 3) {
                         Row(
                             modifier = Modifier
@@ -288,30 +295,22 @@ fun AdminDashboard(
                                 .padding(horizontal = 16.dp, vertical = 12.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            ModernCard(modifier = Modifier.weight(1f)) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Text("Students", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                                    Spacer(Modifier.height(4.dp))
-                                    Text(
-                                        "${students.size}", 
-                                        style = MaterialTheme.typography.headlineMedium, 
-                                        fontWeight = FontWeight.ExtraBold, 
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            }
-                            ModernCard(modifier = Modifier.weight(1f)) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Text("Teachers", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                                    Spacer(Modifier.height(4.dp))
-                                    Text(
-                                        "${teachers.size}", 
-                                        style = MaterialTheme.typography.headlineMedium, 
-                                        fontWeight = FontWeight.ExtraBold, 
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            }
+                            M3StatCard(
+                                title = "Total Students",
+                                value = "${students.size}",
+                                icon = Icons.Default.Group,
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.weight(1f)
+                            )
+                            M3StatCard(
+                                title = "Total Teachers",
+                                value = "${teachers.size}",
+                                icon = Icons.Default.School,
+                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                                modifier = Modifier.weight(1f)
+                            )
                         }
                     }
 
@@ -324,30 +323,30 @@ fun AdminDashboard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                "Bulk Actions", 
-                                style = MaterialTheme.typography.labelMedium, 
-                                color = MaterialTheme.colorScheme.secondary, 
-                                fontWeight = FontWeight.SemiBold
+                                "Bulk Operations", 
+                                style = MaterialTheme.typography.labelLarge, 
+                                color = MaterialTheme.colorScheme.onSurfaceVariant, 
+                                fontWeight = FontWeight.Bold
                             )
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 OutlinedButton(
                                     onClick = { viewModel.bulkUnlockStudents(students) },
-                                    shape = RoundedCornerShape(8.dp),
-                                    contentPadding = PaddingValues(horizontal = 12.dp)
+                                    shape = RoundedCornerShape(50),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                                 ) {
                                     Icon(Icons.Default.LockOpen, contentDescription = null, modifier = Modifier.size(16.dp))
                                     Spacer(Modifier.width(4.dp))
-                                    Text("Unlock All", style = MaterialTheme.typography.labelSmall)
+                                    Text("Unlock All", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
                                 }
                                 Button(
                                     onClick = { viewModel.bulkLockStudents(students) },
-                                    shape = RoundedCornerShape(8.dp),
+                                    shape = RoundedCornerShape(50),
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                                    contentPadding = PaddingValues(horizontal = 12.dp)
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                                 ) {
                                     Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(16.dp))
                                     Spacer(Modifier.width(4.dp))
-                                    Text("Lock All", style = MaterialTheme.typography.labelSmall)
+                                    Text("Lock All", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }

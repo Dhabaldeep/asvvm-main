@@ -6,11 +6,14 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -18,8 +21,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -66,69 +67,144 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+            .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
         AnimatedVisibility(
             visible = visible,
-            enter = fadeIn(animationSpec = tween(500)),
+            enter = fadeIn(animationSpec = tween(600)) + slideInVertically(initialOffsetY = { 60 }),
         ) {
-            Card(
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    .widthIn(max = 440.dp),
+                shape = RoundedCornerShape(28.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                tonalElevation = 3.dp
             ) {
                 Column(
                     modifier = Modifier
-                        .padding(vertical = 40.dp, horizontal = 24.dp)
+                        .padding(horizontal = 24.dp, vertical = 32.dp)
                         .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // New Premium School Logo
-                    Image(
-                        painter = painterResource(id = R.drawable.app_logo),
-                        contentDescription = "ASVVM Logo",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(MaterialTheme.shapes.medium)
-                    )
+                    // Logo Header Badge
+                    Surface(
+                        shape = RoundedCornerShape(24.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        modifier = Modifier.size(88.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Image(
+                                painter = painterResource(id = R.drawable.app_logo),
+                                contentDescription = "ASVVM Logo",
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .clip(RoundedCornerShape(18.dp))
+                            )
+                        }
+                    }
 
-                    Spacer(Modifier.height(24.dp))
+                    Spacer(Modifier.height(16.dp))
+                    
                     Text(
                         "ASVVM PORTAL", 
-                        style = MaterialTheme.typography.headlineMedium, 
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        letterSpacing = 1.sp
-                    )
-                    Text(
-                        "Academic Excellence & Management", 
-                        style = MaterialTheme.typography.bodySmall, 
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.Medium
+                        style = MaterialTheme.typography.displayMedium, 
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     
-                    Spacer(Modifier.height(24.dp))
+                    Spacer(Modifier.height(4.dp))
                     
-                    // Login Type Toggle
-                    TabRow(
-                        selectedTabIndex = if (isStudentLogin) 1 else 0,
-                        containerColor = Color.Transparent,
-                        divider = {}
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.secondaryContainer
                     ) {
-                        Tab(
-                            selected = !isStudentLogin,
-                            onClick = { isStudentLogin = false },
-                            text = { Text("Staff Login", fontWeight = FontWeight.Bold) }
+                        Text(
+                            "Academic Excellence & Management", 
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall, 
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            fontWeight = FontWeight.Bold
                         )
-                        Tab(
-                            selected = isStudentLogin,
-                            onClick = { isStudentLogin = true },
-                            text = { Text("Student Login", fontWeight = FontWeight.Bold) }
-                        )
+                    }
+                    
+                    Spacer(Modifier.height(28.dp))
+                    
+                    // M3 Expressive Pill Role Switcher
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(4.dp)
+                        ) {
+                            // Staff Tab
+                            Surface(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                                    .clip(RoundedCornerShape(50))
+                                    .clickable { isStudentLogin = false },
+                                shape = RoundedCornerShape(50),
+                                color = if (!isStudentLogin) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(
+                                        Icons.Default.Badge,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = if (!isStudentLogin) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        "Staff Login",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (!isStudentLogin) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+
+                            // Student Tab
+                            Surface(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                                    .clip(RoundedCornerShape(50))
+                                    .clickable { isStudentLogin = true },
+                                shape = RoundedCornerShape(50),
+                                color = if (isStudentLogin) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(
+                                        Icons.Default.School,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = if (isStudentLogin) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        "Student Login",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isStudentLogin) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
                     }
 
                     Spacer(Modifier.height(24.dp))
@@ -142,7 +218,7 @@ fun LoginScreen(
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, autoCorrect = false)
                         )
 
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(14.dp))
 
                         PremiumTextField(
                             value = password,
@@ -169,7 +245,7 @@ fun LoginScreen(
                             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
                         )
 
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(14.dp))
 
                         PremiumTextField(
                             value = accessCode,
@@ -180,14 +256,14 @@ fun LoginScreen(
                         )
                     }
 
-                    Spacer(Modifier.height(40.dp))
+                    Spacer(Modifier.height(28.dp))
 
                     if (authState is AuthState.Loading) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary, strokeWidth = 3.dp)
                     } else {
                         Column(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             ModernButton(
                                 onClick = { 
@@ -203,24 +279,37 @@ fun LoginScreen(
                             if (!isStudentLogin) {
                                 OutlinedButton(
                                     onClick = { viewModel.register(email, password) },
-                                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                                    shape = RoundedCornerShape(12.dp),
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(52.dp),
+                                    shape = RoundedCornerShape(16.dp),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
                                 ) {
-                                    Text("REGISTER", fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
+                                    Text(
+                                        "REGISTER", 
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
                                 }
                             }
                         }
                     }
 
                     if (authState is AuthState.Error) {
-                        Spacer(Modifier.height(20.dp))
-                        Text(
-                            text = (authState as AuthState.Error).message,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
+                        Spacer(Modifier.height(16.dp))
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.errorContainer
+                        ) {
+                            Text(
+                                text = (authState as AuthState.Error).message,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }

@@ -34,7 +34,7 @@ fun AddStudentDialog(className: String, onDismiss: () -> Unit, onConfirm: (Strin
 
     AlertDialog(
         modifier = Modifier.imePadding(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(24.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
         titleContentColor = MaterialTheme.colorScheme.primary,
@@ -68,7 +68,7 @@ fun AddTeacherDialog(onDismiss: () -> Unit, onConfirm: (String, String, String, 
 
     AlertDialog(
         modifier = Modifier.imePadding(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(24.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
         titleContentColor = MaterialTheme.colorScheme.primary,
@@ -122,7 +122,7 @@ fun AssignClassDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
 
     AlertDialog(
         modifier = Modifier.imePadding(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(24.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
         titleContentColor = MaterialTheme.colorScheme.primary,
@@ -248,7 +248,7 @@ fun AddSubjectDialog(
 
     AlertDialog(
         modifier = Modifier.imePadding(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(24.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
         titleContentColor = MaterialTheme.colorScheme.primary,
@@ -405,7 +405,7 @@ fun EditStudentDialog(student: com.school.asvvm.data.model.Student, onDismiss: (
 
     AlertDialog(
         modifier = Modifier.imePadding(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(24.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
         titleContentColor = MaterialTheme.colorScheme.primary,
@@ -436,7 +436,7 @@ fun EditTeacherDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
 
     AlertDialog(
         modifier = Modifier.imePadding(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(24.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
         titleContentColor = MaterialTheme.colorScheme.primary,
@@ -446,7 +446,7 @@ fun EditTeacherDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 Surface(
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(24.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -490,7 +490,7 @@ fun StudentDetailsDialog(
     
     Dialog(onDismissRequest = onDismiss) {
         ElevatedCard(
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(24.dp),
             modifier = Modifier.fillMaxWidth().heightIn(max = 600.dp),
             colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
@@ -513,7 +513,7 @@ fun StudentDetailsDialog(
                     groupedMarks.forEach { (term, termMarks) ->
                         Spacer(Modifier.height(8.dp))
                         Surface(
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(24.dp),
                             color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
                             modifier = Modifier.fillMaxWidth()
                         ) {

@@ -2,14 +2,33 @@ package com.school.asvvm.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+
+// Extension properties for M3 Surface Containers
+val ColorScheme.surfaceContainerLowest: Color
+    @Composable get() = if (isSystemInDarkTheme()) md_theme_dark_surfaceContainerLowest else md_theme_light_surfaceContainerLowest
+
+val ColorScheme.surfaceContainerLow: Color
+    @Composable get() = if (isSystemInDarkTheme()) md_theme_dark_surfaceContainerLow else md_theme_light_surfaceContainerLow
+
+val ColorScheme.surfaceContainer: Color
+    @Composable get() = if (isSystemInDarkTheme()) md_theme_dark_surfaceContainer else md_theme_light_surfaceContainer
+
+val ColorScheme.surfaceContainerHigh: Color
+    @Composable get() = if (isSystemInDarkTheme()) md_theme_dark_surfaceContainerHigh else md_theme_light_surfaceContainerHigh
+
+val ColorScheme.surfaceContainerHighest: Color
+    @Composable get() = if (isSystemInDarkTheme()) md_theme_dark_surfaceContainerHighest else md_theme_light_surfaceContainerHighest
+
 
 private val LightColorScheme = lightColorScheme(
     primary = md_theme_light_primary,
@@ -75,8 +94,11 @@ fun ASVVMSchoolTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            window.statusBarColor = colorScheme.background.toArgb()
+            window.navigationBarColor = colorScheme.surfaceVariant.toArgb()
+            val insetsController = WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = !darkTheme
+            insetsController.isAppearanceLightNavigationBars = !darkTheme
         }
     }
 

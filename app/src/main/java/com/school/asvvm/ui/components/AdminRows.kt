@@ -24,7 +24,14 @@ import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.rememberDismissState
 
 @Composable
-fun StudentRow(student: Student, modifier: Modifier = Modifier, onClick: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit, onUnlock: () -> Unit) {
+fun StudentRow(
+    student: Student, 
+    modifier: Modifier = Modifier, 
+    onClick: () -> Unit, 
+    onEdit: () -> Unit, 
+    onDelete: () -> Unit, 
+    onUnlock: () -> Unit
+) {
     val dismissState = rememberDismissState(
         confirmStateChange = {
             if (it == DismissValue.DismissedToStart || it == DismissValue.DismissedToEnd) {
@@ -51,62 +58,80 @@ fun StudentRow(student: Student, modifier: Modifier = Modifier, onClick: () -> U
             }
         },
         dismissContent = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .clickable(onClick = onClick)
-                    .padding(vertical = 12.dp, horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+            ModernCard(
+                onClick = onClick,
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
             ) {
-                val colors = listOf(SubjectMath, SubjectScience, SubjectEnglish, SubjectArt, SubjectHistory)
-                val color = colors[student.rollNo.hashCode().let { if (it < 0) -it else it } % colors.size]
-                
-                ColoredIconBox(
-                    icon = if (student.lockedTerms.isEmpty()) Icons.Default.Person else Icons.Default.Lock,
-                    color = if (student.lockedTerms.isEmpty()) color else MaterialTheme.colorScheme.error
-                )
-                
-                Spacer(Modifier.width(16.dp))
-                 Column(modifier = Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(student.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                        if (student.lockedTerms.isNotEmpty()) {
-                            Spacer(Modifier.width(8.dp))
-                            Surface(
-                                color = MaterialTheme.colorScheme.errorContainer,
-                                shape = RoundedCornerShape(4.dp)
-                            ) {
-                                Text(
-                                    "LOCKED", 
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.error,
-                                    fontWeight = FontWeight.Bold
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val colors = listOf(SubjectMath, SubjectScience, SubjectEnglish, SubjectArt, SubjectHistory)
+                    val color = colors[student.rollNo.hashCode().let { if (it < 0) -it else it } % colors.size]
+                    
+                    ColoredIconBox(
+                        icon = if (student.lockedTerms.isEmpty()) Icons.Default.Person else Icons.Default.Lock,
+                        color = if (student.lockedTerms.isEmpty()) color else MaterialTheme.colorScheme.error
+                    )
+                    
+                    Spacer(Modifier.width(14.dp))
+                    
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                student.name, 
+                                style = MaterialTheme.typography.titleMedium, 
+                                fontWeight = FontWeight.Bold, 
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            if (student.lockedTerms.isNotEmpty()) {
+                                Spacer(Modifier.width(8.dp))
+                                M3StatusChip(
+                                    text = "LOCKED",
+                                    icon = Icons.Default.Lock,
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
                                 )
                             }
                         }
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            "Roll No: ${student.rollNo} • Guardian: ${student.guardian.ifBlank { "N/A" }}", 
+                            style = MaterialTheme.typography.bodySmall, 
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
-                    Text("Roll No: ${student.rollNo} • Guardian: ${student.guardian}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                
-                
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.primary)
-                }
-                if (student.lockedTerms.isNotEmpty()) {
-                    IconButton(onClick = onUnlock) {
-                        Icon(Icons.Default.LockOpen, contentDescription = "Unlock", tint = SubjectScience)
+                    
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = onEdit,
+                            colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(18.dp))
+                        }
+                        if (student.lockedTerms.isNotEmpty()) {
+                            IconButton(
+                                onClick = onUnlock,
+                                colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.tertiary)
+                            ) {
+                                Icon(Icons.Default.LockOpen, contentDescription = "Unlock", modifier = Modifier.size(18.dp))
+                            }
+                        }
                     }
                 }
             }
         }
     )
-    Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 }
 
 @Composable
-fun TeacherRow(teacher: Teacher, modifier: Modifier = Modifier, onEdit: () -> Unit, onAssignClass: () -> Unit, onDelete: () -> Unit) {
+fun TeacherRow(
+    teacher: Teacher, 
+    modifier: Modifier = Modifier, 
+    onEdit: () -> Unit, 
+    onAssignClass: () -> Unit, 
+    onDelete: () -> Unit
+) {
     val dismissState = rememberDismissState(
         confirmStateChange = {
             if (it == DismissValue.DismissedToStart || it == DismissValue.DismissedToEnd) {
@@ -133,35 +158,51 @@ fun TeacherRow(teacher: Teacher, modifier: Modifier = Modifier, onEdit: () -> Un
             }
         },
         dismissContent = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(vertical = 12.dp, horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+            ModernCard(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
             ) {
-                ColoredIconBox(icon = Icons.Default.School, color = MaterialTheme.colorScheme.secondary)
-                Spacer(Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(teacher.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    val safeClasses = teacher.assignedClasses ?: emptyList()
-                    if (safeClasses.isNotEmpty()) {
-                        Text("Classes: ${safeClasses.joinToString()}", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
-                    } else {
-                        Text("No Assigned Classes", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelMedium)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ColoredIconBox(icon = Icons.Default.School, color = MaterialTheme.colorScheme.secondary)
+                    Spacer(Modifier.width(14.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            teacher.name, 
+                            style = MaterialTheme.typography.titleMedium, 
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        val safeClasses = teacher.assignedClasses ?: emptyList()
+                        if (safeClasses.isNotEmpty()) {
+                            M3StatusChip(
+                                text = "Classes: ${safeClasses.joinToString()}",
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        } else {
+                            M3StatusChip(
+                                text = "No Assigned Class",
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
                     }
-                }
-                
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.primary)
-                }
-                IconButton(onClick = onAssignClass) {
-                    Icon(Icons.Default.AssignmentInd, contentDescription = "Assign Class", tint = MaterialTheme.colorScheme.secondary)
+                    
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = onEdit) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                        }
+                        IconButton(onClick = onAssignClass) {
+                            Icon(Icons.Default.AssignmentInd, contentDescription = "Assign Class", tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
+                        }
+                    }
                 }
             }
         }
     )
-    Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 }
 
 @Composable
@@ -170,15 +211,15 @@ fun UnifiedSubjectRow(
     configs: List<com.school.asvvm.data.model.SubjectConfig>,
     onDelete: () -> Unit
 ) {
-    var isExpanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
 
-    ModernCard {
-        Column(modifier = Modifier.fillMaxWidth().animateContentSize()) {
+    ModernCard(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        onClick = { expanded = !expanded }
+    ) {
+        Column(modifier = Modifier.animateContentSize()) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { isExpanded = !isExpanded }
-                    .padding(16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val subjectColor = when {
@@ -189,87 +230,62 @@ fun UnifiedSubjectRow(
                     else -> MaterialTheme.colorScheme.primary
                 }
 
-                ColoredIconBox(icon = Icons.Default.LibraryBooks, color = subjectColor)
-                
-                Spacer(Modifier.width(16.dp))
-
+                ColoredIconBox(icon = Icons.Default.Book, color = subjectColor)
+                Spacer(Modifier.width(14.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         subjectName, 
                         style = MaterialTheme.typography.titleMedium, 
-                        fontWeight = FontWeight.SemiBold, 
+                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
+                    Spacer(Modifier.height(2.dp))
                     Text(
                         "${configs.size} Terms Configured", 
-                        style = MaterialTheme.typography.labelSmall, 
-                        color = subjectColor,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Default.DeleteSweep, 
-                        contentDescription = "Delete All", 
-                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                        style = MaterialTheme.typography.bodySmall, 
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 
-                Icon(
-                    if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onDelete) {
+                        Icon(Icons.Default.Delete, contentDescription = "Delete Subject", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
+                    }
+                    Icon(
+                        if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
-            if (isExpanded) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                ) {
-                    Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-                    Spacer(Modifier.height(12.dp))
-                    
-                    configs.sortedBy { 
-                        when(it.term) {
-                            com.school.asvvm.data.model.ExamTerm.FIRST_HALF.name -> 1
-                            com.school.asvvm.data.model.ExamTerm.SECOND_HALF.name -> 2
-                            else -> 3
-                        }
-                    }.forEach { config ->
-                        val termTitle = try { 
-                            com.school.asvvm.data.model.ExamTerm.valueOf(config.term).title 
-                        } catch(e:Exception) { config.term }
-                        
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                termTitle, 
-                                style = MaterialTheme.typography.bodySmall, 
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.width(80.dp)
-                            )
-                            Surface(
-                                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
-                                shape = RoundedCornerShape(4.dp)
-                            ) {
-                                Text(
-                                    "W: ${config.maxWritten}" + if(config.hasOral) " | O: ${config.maxOral}" else "",
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            }
-                        }
+            if (expanded) {
+                Spacer(Modifier.height(12.dp))
+                Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                Spacer(Modifier.height(12.dp))
+                
+                configs.forEach { config ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        M3StatusChip(
+                            text = config.term,
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Text(
+                            "Written: ${config.maxWritten} | Oral: ${if (config.hasOral) config.maxOral else "N/A"}",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
             }
         }
     }
 }
-

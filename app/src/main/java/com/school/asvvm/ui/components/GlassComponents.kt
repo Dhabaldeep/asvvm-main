@@ -4,6 +4,7 @@ package com.school.asvvm.ui.components
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -13,14 +14,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -28,9 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.school.asvvm.ui.theme.*
 
-
-
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Material 3 Expressive Top App Bar with tonal surface container styling.
+ */
 @Composable
 fun SchoolTopBar(
     title: String,
@@ -39,11 +38,13 @@ fun SchoolTopBar(
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.background,
-        tonalElevation = 0.dp
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = 2.dp
     ) {
-        @OptIn(ExperimentalMaterial3Api::class)
         TopAppBar(
             title = {
                 Column(horizontalAlignment = Alignment.Start) {
@@ -51,24 +52,35 @@ fun SchoolTopBar(
                         title, 
                         style = MaterialTheme.typography.titleLarge, 
                         fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 0.5.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     if (subtitle != null) {
-                        Text(
-                            subtitle, 
-                            style = MaterialTheme.typography.labelSmall, 
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Surface(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(50)
+                        ) {
+                            Text(
+                                subtitle, 
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall, 
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             },
             actions = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     actions()
-                    IconButton(onClick = onLogout) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout", tint = MaterialTheme.colorScheme.error)
+                    IconButton(
+                        onClick = onLogout,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.6f),
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout", modifier = Modifier.size(20.dp))
                     }
                 }
             },
@@ -80,19 +92,25 @@ fun SchoolTopBar(
     }
 }
 
+/**
+ * Material 3 Expressive Card with surface container elevation and smooth corners.
+ */
 @Composable
 fun ModernCard(
     modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.surface,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     if (onClick != null) {
-        ElevatedCard(
-            modifier = modifier.padding(8.dp).clip(RoundedCornerShape(8.dp)),
-            shape = RoundedCornerShape(8.dp),
-            colors = CardDefaults.elevatedCardColors(containerColor = containerColor),
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
+        Card(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 6.dp)
+                .clip(RoundedCornerShape(16.dp)),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = containerColor),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             onClick = onClick
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -100,15 +118,102 @@ fun ModernCard(
             }
         }
     } else {
-        ElevatedCard(
-            modifier = modifier.padding(8.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = CardDefaults.elevatedCardColors(containerColor = containerColor),
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
+        Card(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 6.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = containerColor),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 content()
             }
+        }
+    }
+}
+
+/**
+ * Hero Stat Card for Admin & Teacher Dashboards.
+ */
+@Composable
+fun M3StatCard(
+    title: String,
+    value: String,
+    icon: ImageVector,
+    containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
+    contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        color = containerColor
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = contentColor.copy(alpha = 0.8f),
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    value,
+                    style = MaterialTheme.typography.displayMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = contentColor
+                )
+            }
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = contentColor.copy(alpha = 0.15f),
+                modifier = Modifier.size(48.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(24.dp))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Status Chip Badge for Students, Teachers, and Terms.
+ */
+@Composable
+fun M3StatusChip(
+    text: String,
+    icon: ImageVector? = null,
+    containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
+    contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(50),
+        color = containerColor
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            if (icon != null) {
+                Icon(icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(12.dp))
+            }
+            Text(
+                text = text.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = contentColor,
+                letterSpacing = 0.5.sp
+            )
         }
     }
 }
@@ -121,8 +226,8 @@ fun ColoredIconBox(
 ) {
     Surface(
         modifier = modifier.size(44.dp),
-        shape = RoundedCornerShape(12.dp),
-        color = color.copy(alpha = 0.12f)
+        shape = RoundedCornerShape(14.dp),
+        color = color.copy(alpha = 0.15f)
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
@@ -135,6 +240,9 @@ fun ColoredIconBox(
     }
 }
 
+/**
+ * Material 3 Expressive Button.
+ */
 @Composable
 fun ModernButton(
     onClick: () -> Unit,
@@ -145,14 +253,9 @@ fun ModernButton(
     Button(
         onClick = onClick,
         modifier = modifier
-            .height(48.dp)
-            .fillMaxWidth()
-            .shadow(
-                elevation = 1.dp,
-                shape = RoundedCornerShape(8.dp),
-                spotColor = containerColor.copy(alpha = 0.1f)
-            ),
-        shape = RoundedCornerShape(8.dp),
+            .height(52.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -161,12 +264,15 @@ fun ModernButton(
         Text(
             text, 
             fontWeight = FontWeight.Bold, 
-            fontSize = 16.sp,
-            letterSpacing = 1.sp
+            style = MaterialTheme.typography.labelLarge,
+            letterSpacing = 0.5.sp
         )
     }
 }
 
+/**
+ * Material 3 Expressive Input Text Field.
+ */
 @Composable
 fun PremiumTextField(
     value: String,
@@ -185,7 +291,7 @@ fun PremiumTextField(
         enabled = enabled,
         label = { Text(label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium) },
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(14.dp),
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         visualTransformation = visualTransformation,
@@ -193,13 +299,13 @@ fun PremiumTextField(
         singleLine = true,
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
             focusedLabelColor = MaterialTheme.colorScheme.primary,
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     )
 }
-
 
 @Composable
 fun ShimmerAnimation(
@@ -217,10 +323,12 @@ fun ShimmerAnimation(
         label = "shimmer_translate"
     )
 
+    val highColor = MaterialTheme.colorScheme.surfaceVariant
+    val lowColor = MaterialTheme.colorScheme.surface
     val shimmerColors = listOf(
-        Color.LightGray.copy(alpha = 0.6f),
-        Color.LightGray.copy(alpha = 0.2f),
-        Color.LightGray.copy(alpha = 0.6f),
+        highColor.copy(alpha = 0.6f),
+        lowColor.copy(alpha = 0.3f),
+        highColor.copy(alpha = 0.6f),
     )
 
     val brush = Brush.linearGradient(
@@ -261,20 +369,20 @@ fun EmptyStateView(icon: ImageVector, title: String, subtitle: String) {
         verticalArrangement = Arrangement.Center
     ) {
         Surface(
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-            modifier = Modifier.size(100.dp)
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+            modifier = Modifier.size(96.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(60.dp),
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,

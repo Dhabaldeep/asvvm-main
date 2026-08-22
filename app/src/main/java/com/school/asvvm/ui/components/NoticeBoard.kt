@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.school.asvvm.data.model.Notice
+import com.school.asvvm.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -30,25 +32,55 @@ fun NoticeBoardDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
-        modifier = Modifier.fillMaxWidth(0.9f).fillMaxHeight(0.8f),
-        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth(0.92f)
+            .fillMaxHeight(0.82f),
+        shape = RoundedCornerShape(28.dp),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         title = {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically, 
+                modifier = Modifier.fillMaxWidth(), 
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Notifications, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Notice Board", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Default.Campaign, 
+                                contentDescription = null, 
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        "Announcements", 
+                        fontWeight = FontWeight.ExtraBold, 
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
-                IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = "Close")
+                IconButton(
+                    onClick = onDismiss,
+                    colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest)
+                ) {
+                    Icon(Icons.Default.Close, contentDescription = "Close", modifier = Modifier.size(18.dp))
                 }
             }
         },
         text = {
             if (notices.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No announcements", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
+                EmptyStateView(
+                    icon = Icons.Default.Notifications,
+                    title = "No Announcements",
+                    subtitle = "There are no school-wide notices posted at this time."
+                )
             } else {
                 LazyColumn(
                     contentPadding = PaddingValues(bottom = 16.dp),
@@ -69,19 +101,38 @@ fun NoticeCard(notice: Notice) {
     val sdf = SimpleDateFormat("MMM dd, yyyy 'at' hh:mm a", Locale.getDefault())
     val dateString = sdf.format(Date(notice.timestamp))
     
-    Surface(
-        shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        modifier = Modifier.fillMaxWidth()
+    ModernCard(
+        containerColor = MaterialTheme.colorScheme.surfaceContainer
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(notice.title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-            Spacer(Modifier.height(4.dp))
-            Text(notice.message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.height(12.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(dateString, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-                Text("- ${notice.author}", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.secondary)
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                notice.title, 
+                fontWeight = FontWeight.ExtraBold, 
+                style = MaterialTheme.typography.titleMedium, 
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                notice.message, 
+                style = MaterialTheme.typography.bodyMedium, 
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(14.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(), 
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                M3StatusChip(
+                    text = dateString,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+                M3StatusChip(
+                    text = "By ${notice.author}",
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             }
         }
     }
@@ -98,21 +149,36 @@ fun CreateNoticeDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Create Notice", fontWeight = FontWeight.Bold) },
+        shape = RoundedCornerShape(28.dp),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        title = { 
+            Text(
+                "Broadcast Notice", 
+                fontWeight = FontWeight.ExtraBold, 
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            ) 
+        },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                PremiumTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Title") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    label = "Notice Title"
                 )
                 OutlinedTextField(
                     value = message,
                     onValueChange = { message = it },
-                    label = { Text("Message") },
-                    modifier = Modifier.fillMaxWidth().height(120.dp)
+                    label = { Text("Notice Content", style = MaterialTheme.typography.bodyMedium) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
                 )
             }
         },
@@ -123,14 +189,16 @@ fun CreateNoticeDialog(
                         onSubmit(title.trim(), message.trim())
                     }
                 },
-                enabled = title.isNotBlank() && message.isNotBlank()
+                enabled = title.isNotBlank() && message.isNotBlank(),
+                shape = RoundedCornerShape(50),
+                modifier = Modifier.height(44.dp)
             ) {
-                Text("Publish")
+                Text("Publish Notice", fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Cancel", fontWeight = FontWeight.Bold)
             }
         }
     )
