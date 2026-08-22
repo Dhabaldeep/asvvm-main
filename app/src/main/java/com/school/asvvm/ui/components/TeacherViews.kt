@@ -2,10 +2,12 @@
 package com.school.asvvm.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -59,7 +61,12 @@ fun TeacherClassSelector(classes: List<String>, selectedClass: String?, onClassS
 
 
 @Composable
-fun TeacherProfileView(teacher: com.school.asvvm.data.model.Teacher?) {
+fun TeacherProfileView(
+    teacher: com.school.asvvm.data.model.Teacher?,
+    onApplyLeave: () -> Unit = {},
+    onChangePassword: () -> Unit = {},
+    onSignOut: () -> Unit = {}
+) {
     if (teacher == null) return
     Column(
         modifier = Modifier
@@ -104,7 +111,60 @@ fun TeacherProfileView(teacher: com.school.asvvm.data.model.Teacher?) {
             )
         }
         
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(20.dp))
+        
+        // Managed Stats Grid
+        val safeClasses = teacher.assignedClasses ?: emptyList()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            M3StatCard(
+                title = "Classes Managed",
+                value = "${safeClasses.size}",
+                icon = Icons.Default.Class,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.weight(1f)
+            )
+            Surface(
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(onClick = onApplyLeave),
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.tertiaryContainer
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text(
+                            "Faculty Leave",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f),
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "Apply",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
+                    Icon(
+                        Icons.Default.EventAvailable,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            }
+        }
+        
+        Spacer(Modifier.height(16.dp))
         
         ModernCard(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
@@ -114,8 +174,53 @@ fun TeacherProfileView(teacher: com.school.asvvm.data.model.Teacher?) {
                 Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), modifier = Modifier.padding(vertical = 12.dp))
                 ProfileInfoRow("Gender Identity", teacher.gender.takeIf { it.isNotBlank() } ?: "Not Set")
                 Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), modifier = Modifier.padding(vertical = 12.dp))
-                val safeClasses = teacher.assignedClasses ?: emptyList()
-                ProfileInfoRow("Managed Classes", safeClasses.size.toString())
+                ProfileInfoRow("Assigned Roster", safeClasses.joinToString().ifBlank { "None" })
+            }
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        // Quick Action Buttons
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Button(
+                onClick = onApplyLeave,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+            ) {
+                Icon(Icons.Default.EventAvailable, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("APPLY FOR LEAVE", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
+            }
+
+            OutlinedButton(
+                onClick = onChangePassword,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("CHANGE PASSWORD", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
+            }
+
+            OutlinedButton(
+                onClick = onSignOut,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) {
+                Icon(Icons.Default.ExitToApp, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("SIGN OUT", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
             }
         }
     }
@@ -216,27 +321,42 @@ fun TeacherGradingView(students: List<Student>, className: String, viewModel: Te
         selectedStudent?.lockedTerms?.contains(selectedTerm.name) == true
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+    ) {
+        // Expressive Student Selection Tabs
         ScrollableTabRow(
             selectedTabIndex = students.indexOf(selectedStudent).coerceAtLeast(0),
-            edgePadding = 16.dp,
-            containerColor = MaterialTheme.colorScheme.surface,
+            edgePadding = 12.dp,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             divider = {}
         ) {
             students.forEach { student ->
+                val isSelected = selectedStudent == student
                 Tab(
-                    selected = selectedStudent == student,
-                    onClick = { 
-                        selectedStudentId = student.id
-                    },
+                    selected = isSelected,
+                    onClick = { selectedStudentId = student.id },
                     text = { 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(student.name, 
-                                 color = if (selectedStudent == student) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                 fontWeight = if (selectedStudent == student) FontWeight.Bold else FontWeight.Normal) 
-                            if (student.lockedTerms.isNotEmpty()) {
-                                Spacer(Modifier.width(4.dp))
-                                Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.error)
+                        Surface(
+                            color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                            shape = RoundedCornerShape(50)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    student.name, 
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium
+                                ) 
+                                if (student.lockedTerms.isNotEmpty()) {
+                                    Spacer(Modifier.width(4.dp))
+                                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.error)
+                                }
                             }
                         }
                     }
@@ -246,77 +366,139 @@ fun TeacherGradingView(students: List<Student>, className: String, viewModel: Te
 
         if (selectedStudent != null) {
             val termConfigs = subjectConfigs.filter { it.term == selectedTerm.name }
+            
+            // Calculate live totals
+            val currentTotalObtained = termConfigs.sumOf { config ->
+                val score = scores[config.subjectName] ?: Pair("0", "0")
+                (score.first.toIntOrNull() ?: 0) + (score.second.toIntOrNull() ?: 0)
+            }
+            val currentTotalMax = termConfigs.sumOf { it.maxWritten + (if (it.hasOral) it.maxOral else 0) }
+
             LazyColumn(
                 modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 item {
-                    Text("Grading: ${selectedStudent?.name}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                    if (isLocked) {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                            color = MaterialTheme.colorScheme.errorContainer,
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.error)
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    "MARKS LOCKED: This term is locked for the student. Contact Admin to modify.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onErrorContainer,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    
-                    // Term Selector Dropdown
-                    var termExpanded by remember { mutableStateOf(false) }
-                    Text("Select Academic Term:", style = MaterialTheme.typography.labelSmall)
-                    Box(modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)) {
-                        OutlinedButton(
-                            onClick = { termExpanded = true },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = if(isLocked) ButtonDefaults.outlinedButtonColors(containerColor = Color.Transparent) else ButtonDefaults.outlinedButtonColors()
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(selectedTerm.title)
-                                if (isLocked) {
-                                    Spacer(Modifier.width(8.dp))
-                                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(16.dp))
+                    // Student & Term Header Card with Live Score Preview
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainer
+                    ) {
+                        Column(modifier = Modifier.padding(18.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(
+                                        "Grading Sheet", 
+                                        style = MaterialTheme.typography.labelSmall, 
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        selectedStudent.name, 
+                                        style = MaterialTheme.typography.headlineMedium, 
+                                        fontWeight = FontWeight.ExtraBold, 
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                                Surface(
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = MaterialTheme.colorScheme.primaryContainer
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            "TOTAL SCORE",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                        )
+                                        Text(
+                                            "$currentTotalObtained / $currentTotalMax",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    }
                                 }
                             }
-                        }
-                        DropdownMenu(expanded = termExpanded, onDismissRequest = { termExpanded = false }) {
-                            com.school.asvvm.data.model.ExamTerm.entries.forEach { term ->
-                                DropdownMenuItem(
-                                    text = { 
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Text(term.title)
-                                            if (selectedStudent?.lockedTerms?.contains(term.name) == true) {
-                                                Spacer(Modifier.width(8.dp))
-                                                Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.error)
+
+                            if (isLocked) {
+                                Spacer(Modifier.height(12.dp))
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = MaterialTheme.colorScheme.errorContainer,
+                                    shape = RoundedCornerShape(14.dp)
+                                ) {
+                                    Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            "MARKS LOCKED: This term is locked for the student. Contact Admin to modify.",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onErrorContainer,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(Modifier.height(16.dp))
+                            Text("Term Selection:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Spacer(Modifier.height(8.dp))
+
+                            // One-Tap Term Pill Chips
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                com.school.asvvm.data.model.ExamTerm.entries.forEach { term ->
+                                    val isTermSelected = selectedTerm == term
+                                    val isTermLocked = selectedStudent.lockedTerms.contains(term.name)
+                                    Surface(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(50))
+                                            .clickable { selectedTerm = term },
+                                        shape = RoundedCornerShape(50),
+                                        color = if (isTermSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(vertical = 8.dp),
+                                            horizontalArrangement = Arrangement.Center,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                term.title.replace(" Examination", "").replace(" Term", ""),
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = if (isTermSelected) FontWeight.ExtraBold else FontWeight.Medium,
+                                                color = if (isTermSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                            if (isTermLocked) {
+                                                Spacer(Modifier.width(4.dp))
+                                                Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.error)
                                             }
                                         }
-                                    },
-                                    onClick = {
-                                        selectedTerm = term
-                                        termExpanded = false
                                     }
-                                )
+                                }
                             }
                         }
                     }
                 }
+
                 if (termConfigs.isEmpty()) {
                     item {
-                        Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                            Text("No subjects configured for this term.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
+                        EmptyStateView(
+                            icon = Icons.Default.MenuBook,
+                            title = "No Subjects Configured",
+                            subtitle = "No subjects have been configured for ${selectedTerm.title} yet."
+                        )
                     }
                 }
 

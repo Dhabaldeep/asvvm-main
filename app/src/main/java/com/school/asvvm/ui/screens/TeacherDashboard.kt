@@ -1,6 +1,8 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class, androidx.compose.material.ExperimentalMaterialApi::class)
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class, androidx.compose.material.ExperimentalMaterialApi::class, androidx.compose.animation.ExperimentalAnimationApi::class)
 package com.school.asvvm.ui.screens
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -88,6 +90,9 @@ fun TeacherDashboard(
                 subtitle = "${teacherProfile?.name ?: teacherName}",
                 onLogout = onLogout,
                 actions = {
+                    IconButton(onClick = { showLeaveDialog = true }) {
+                        Icon(Icons.Default.EventAvailable, contentDescription = "Apply Leave", tint = MaterialTheme.colorScheme.tertiary)
+                    }
                     Box {
                         IconButton(onClick = { showNotices = true }) {
                             Icon(Icons.Default.Notifications, contentDescription = "Notices", tint = MaterialTheme.colorScheme.primary)
@@ -101,6 +106,13 @@ fun TeacherDashboard(
                             expanded = showSettingsMenu,
                             onDismissRequest = { showSettingsMenu = false }
                         ) {
+                            DropdownMenuItem(
+                                text = { Text("Apply for Leave") },
+                                onClick = {
+                                    showSettingsMenu = false
+                                    showLeaveDialog = true
+                                }
+                            )
                             DropdownMenuItem(
                                 text = { Text("Change Password") },
                                 onClick = {
@@ -227,61 +239,49 @@ fun TeacherDashboard(
                             }
                             val subjectConfigs by viewModel.subjectConfigs.collectAsState()
                             Box(modifier = Modifier.weight(1f)) {
-                                when (selectedTab) {
-                                    0 -> TeacherStudentListView(students)
-                                    1 -> {
-                                        val currentClass = assignedClass
-                                        if (currentClass != null) {
-                                            TeacherGradingView(students, currentClass, viewModel)
-                                        } else {
-                                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                                Text("Please select a class first.")
+                                androidx.compose.animation.AnimatedContent(
+                                    targetState = selectedTab,
+                                    transitionSpec = {
+                                        fadeIn(animationSpec = tween(250)) with fadeOut(animationSpec = tween(250))
+                                    },
+                                    label = "teacher_tab_transition"
+                                ) { targetTab ->
+                                    when (targetTab) {
+                                        0 -> TeacherStudentListView(students)
+                                        1 -> {
+                                            val currentClass = assignedClass
+                                            if (currentClass != null) {
+                                                TeacherGradingView(students, currentClass, viewModel)
+                                            } else {
+                                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                                    Text("Please select a class first.")
+                                                }
                                             }
                                         }
-                                    }
-                                    2 -> TeacherReportsView(students, marks, subjectConfigs)
-                                    3 -> {
-                                        val currentClass = assignedClass
-                                        if (currentClass != null) {
-                                            TeacherAttendanceView(
-                                                students = students,
-                                                records = attendanceRecords,
-                                                className = currentClass,
-                                                teacherId = profile.email,
-                                                onSubmit = { records -> viewModel.submitAttendance(records) }
-                                            )
-                                        } else {
-                                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                                Text("Please select a class first.")
+                                        2 -> TeacherReportsView(students, marks, subjectConfigs)
+                                        3 -> {
+                                            val currentClass = assignedClass
+                                            if (currentClass != null) {
+                                                TeacherAttendanceView(
+                                                    students = students,
+                                                    records = attendanceRecords,
+                                                    className = currentClass,
+                                                    teacherId = profile.email,
+                                                    onSubmit = { records -> viewModel.submitAttendance(records) }
+                                                )
+                                            } else {
+                                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                                    Text("Please select a class first.")
+                                                }
                                             }
                                         }
-                                    }
-                                    4 -> {
-                                        Column(modifier = Modifier.padding(16.dp)) {
-                                            TeacherProfileView(profile)
-                                            Spacer(Modifier.height(32.dp))
-                                            ModernButton(
-                                                onClick = { showChangePassword = true },
-                                                text = "CHANGE PASSWORD",
-                                                modifier = Modifier.fillMaxWidth()
+                                        4 -> {
+                                            TeacherProfileView(
+                                                teacher = profile,
+                                                onApplyLeave = { showLeaveDialog = true },
+                                                onChangePassword = { showChangePassword = true },
+                                                onSignOut = onLogout
                                             )
-                                            Spacer(Modifier.height(16.dp))
-                                            OutlinedButton(
-                                                onClick = { showLeaveDialog = true },
-                                                modifier = Modifier.fillMaxWidth().height(52.dp),
-                                                shape = RoundedCornerShape(12.dp)
-                                            ) {
-                                                Text("APPLY FOR LEAVE", fontWeight = FontWeight.SemiBold)
-                                            }
-                                            Spacer(Modifier.height(16.dp))
-                                            OutlinedButton(
-                                                onClick = onLogout,
-                                                modifier = Modifier.fillMaxWidth().height(52.dp),
-                                                shape = RoundedCornerShape(12.dp),
-                                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                                            ) {
-                                                Text("SIGN OUT", fontWeight = FontWeight.SemiBold)
-                                            }
                                         }
                                     }
                                 }
