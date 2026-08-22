@@ -100,7 +100,7 @@ class SchoolRepository(
                     trySend(emptyList())
                     return@addSnapshotListener
                 }
-                val students = snapshot?.toObjects<Student>() ?: emptyList()
+                val students = snapshot?.toObjects<Student>()?.map { it.sanitize() } ?: emptyList()
                 trySend(students)
             }
         awaitClose { listener.remove() }
@@ -113,7 +113,7 @@ class SchoolRepository(
     suspend fun getStudentById(studentId: String): com.school.asvvm.data.model.Student? {
         return try {
             val snapshot = firestore.collection("students").document(studentId).get().await()
-            snapshot.toObject(com.school.asvvm.data.model.Student::class.java)
+            snapshot.toObject(com.school.asvvm.data.model.Student::class.java)?.sanitize()
         } catch (e: Exception) {
             null
         }
@@ -208,7 +208,7 @@ class SchoolRepository(
                 trySend(emptyList())
                 return@addSnapshotListener
             }
-            val teachers = snapshot?.toObjects<Teacher>() ?: emptyList()
+            val teachers = snapshot?.toObjects<Teacher>()?.map { it.sanitize() } ?: emptyList()
             trySend(teachers)
         }
         awaitClose { listener.remove() }
@@ -275,7 +275,7 @@ class SchoolRepository(
                     trySend(null)
                     return@addSnapshotListener
                 }
-                val teacher = snapshot?.documents?.firstOrNull()?.toObject(Teacher::class.java)
+                val teacher = snapshot?.documents?.firstOrNull()?.toObject(Teacher::class.java)?.sanitize()
                 trySend(teacher)
             }
         awaitClose { listener.remove() }
@@ -287,7 +287,7 @@ class SchoolRepository(
             // Priority 1: Try direct document fetch (Fastest & Best for cache)
             val directDoc = firestore.collection("Staff").document(safeId).get().await()
             if (directDoc.exists()) {
-                val teacher = directDoc.toObject(Teacher::class.java)
+                val teacher = directDoc.toObject(Teacher::class.java)?.sanitize()
                 if (teacher != null) return ApiResponse(success = true, data = teacher)
             }
 
@@ -302,7 +302,7 @@ class SchoolRepository(
             }
             
             if (doc != null) {
-                val teacher = doc.toObject(Teacher::class.java)
+                val teacher = doc.toObject(Teacher::class.java)?.sanitize()
                 if (teacher != null) {
                     ApiResponse(success = true, data = teacher)
                 } else {
@@ -570,6 +570,24 @@ class SchoolRepository(
             .whereEqualTo("accessCode", accessCode)
             .get()
             .await()
-        return snapshot.documents.firstOrNull()?.toObject(com.school.asvvm.data.model.Student::class.java)
+        return snapshot.documents.firstOrNull()?.toObject(com.school.asvvm.data.model.Student::class.java)?.sanitize()
     }
+
+    private fun Student.sanitize(): Student = this.copy(
+        id = this.id ?: "",
+        rollNo = this.rollNo ?: "",
+        name = this.name ?: "Unknown",
+        className = this.className ?: "",
+        guardian = this.guardian ?: "Not Provided",
+        accessCode = this.accessCode ?: "",
+        lockedTerms = this.lockedTerms ?: emptyList()
+    )
+
+    private fun Teacher.sanitize(): Teacher = this.copy(
+        name = this.name ?: "Unknown",
+        assignedClasses = this.assignedClasses ?: emptyList(),
+        email = this.email ?: "",
+        phone = this.phone ?: "",
+        gender = this.gender ?: ""
+    )
 }

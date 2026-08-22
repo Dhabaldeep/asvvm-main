@@ -81,9 +81,10 @@ class TeacherViewModel @Inject constructor(
                             _teacherProfile.value = profile
                             
                             // If they have classes and current class is null, select the first one
-                            if (profile.assignedClasses.isNotEmpty()) {
-                                if (currentClass == null || !profile.assignedClasses.contains(currentClass)) {
-                                    setAssignedClass(profile.assignedClasses.first())
+                            val safeClasses = profile.assignedClasses ?: emptyList()
+                            if (safeClasses.isNotEmpty()) {
+                                if (currentClass == null || !safeClasses.contains(currentClass)) {
+                                    setAssignedClass(safeClasses.first())
                                 }
                             } else {
                                 if (currentClass != null) {

@@ -139,8 +139,9 @@ fun TeacherRow(teacher: Teacher, modifier: Modifier = Modifier, onEdit: () -> Un
                     Spacer(Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(teacher.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                        if (teacher.assignedClasses.isNotEmpty()) {
-                            Text("Classes: ${teacher.assignedClasses.joinToString()}", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
+                        val safeClasses = teacher.assignedClasses ?: emptyList()
+                        if (safeClasses.isNotEmpty()) {
+                            Text("Classes: ${safeClasses.joinToString()}", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                         } else {
                             Text("No Assigned Classes", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelMedium)
                         }

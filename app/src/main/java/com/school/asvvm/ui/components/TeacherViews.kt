@@ -92,7 +92,8 @@ fun TeacherProfileView(teacher: com.school.asvvm.data.model.Teacher?) {
                 Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f), modifier = Modifier.padding(vertical = 12.dp))
                 ProfileInfoRow("Gender Identity", teacher.gender.takeIf { it.isNotBlank() } ?: "Not Set")
                 Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f), modifier = Modifier.padding(vertical = 12.dp))
-                ProfileInfoRow("Managed Classes", teacher.assignedClasses.size.toString())
+                val safeClasses = teacher.assignedClasses ?: emptyList()
+                ProfileInfoRow("Managed Classes", safeClasses.size.toString())
             }
         }
     }

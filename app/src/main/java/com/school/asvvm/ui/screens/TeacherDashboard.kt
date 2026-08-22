@@ -211,10 +211,11 @@ fun TeacherDashboard(
                 Column(modifier = Modifier.fillMaxSize()) {
                     val profile = teacherProfile
                     if (profile != null) {
-                        if (profile.assignedClasses.isNotEmpty()) {
+                        val safeClasses = profile.assignedClasses ?: emptyList()
+                        if (safeClasses.isNotEmpty()) {
                             if (selectedTab != 4) {
                                 TeacherClassSelector(
-                                    classes = profile.assignedClasses,
+                                    classes = safeClasses,
                                     selectedClass = assignedClass,
                                     onClassSelected = { viewModel.setAssignedClass(it) }
                                 )

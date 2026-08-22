@@ -132,7 +132,8 @@ fun AssignClassDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
             Column {
                 Text("Assigning to: ${teacher.name}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.height(8.dp))
-                if (teacher.assignedClasses.isNotEmpty()) {
+                val safeClasses = teacher.assignedClasses ?: emptyList()
+                if (safeClasses.isNotEmpty()) {
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                         shape = RoundedCornerShape(12.dp)
@@ -140,7 +141,7 @@ fun AssignClassDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text("Currently assigned:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                             Spacer(Modifier.height(8.dp))
-                            teacher.assignedClasses.forEach { cls ->
+                            safeClasses.forEach { cls ->
                                 Row(
                                     modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -170,7 +171,7 @@ fun AssignClassDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
                         Text(selectedClass)
                     }
                     DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                        val availableClasses = SchoolClass.values().map { it.value }.filter { !teacher.assignedClasses.contains(it) }
+                        val availableClasses = SchoolClass.values().map { it.value }.filter { !safeClasses.contains(it) }
                         if (availableClasses.isEmpty()) {
                             DropdownMenuItem(text = { Text("All classes assigned") }, onClick = { expanded = false })
                         } else {
@@ -190,7 +191,8 @@ fun AssignClassDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
         },
         confirmButton = {
             Button(onClick = { 
-                if (!teacher.assignedClasses.contains(selectedClass)) onConfirm(selectedClass) 
+                val safeClassesBtn = teacher.assignedClasses ?: emptyList()
+                if (!safeClassesBtn.contains(selectedClass)) onConfirm(selectedClass) 
             }) { Text("ASSIGN") }
         },
         dismissButton = {
@@ -454,7 +456,8 @@ fun EditTeacherDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
                         Spacer(Modifier.height(4.dp))
                         Text("Gender: ${teacher.gender.ifBlank { "Not Set" }}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                         Spacer(Modifier.height(4.dp))
-                        Text("Classes: ${if (teacher.assignedClasses.isEmpty()) "None" else teacher.assignedClasses.joinToString()}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                        val safeClasses = teacher.assignedClasses ?: emptyList()
+                        Text("Classes: ${if (safeClasses.isEmpty()) "None" else safeClasses.joinToString()}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                     }
                 }
                 
