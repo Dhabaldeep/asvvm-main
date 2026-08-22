@@ -163,7 +163,7 @@ fun TeacherDashboard(
             }
         },
         floatingActionButton = {
-            if (assignedClass != null && teacherProfile != null) {
+            if (selectedTab == 0 && assignedClass != null && teacherProfile != null) {
                 ExtendedFloatingActionButton(
                     onClick = { showTimetableDialog = true },
                     containerColor = MaterialTheme.colorScheme.tertiary,
