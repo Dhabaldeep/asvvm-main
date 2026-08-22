@@ -51,55 +51,58 @@ fun StudentRow(student: Student, modifier: Modifier = Modifier, onClick: () -> U
             }
         },
         dismissContent = {
-            ModernCard(onClick = onClick) {
-                Row(
-                    modifier = Modifier.padding(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val colors = listOf(SubjectMath, SubjectScience, SubjectEnglish, SubjectArt, SubjectHistory)
-                    val color = colors[student.rollNo.hashCode().let { if (it < 0) -it else it } % colors.size]
-                    
-                    ColoredIconBox(
-                        icon = if (student.lockedTerms.isEmpty()) Icons.Default.Person else Icons.Default.Lock,
-                        color = if (student.lockedTerms.isEmpty()) color else MaterialTheme.colorScheme.error
-                    )
-                    
-                    Spacer(Modifier.width(16.dp))
-                     Column(modifier = Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(student.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                            if (student.lockedTerms.isNotEmpty()) {
-                                Spacer(Modifier.width(8.dp))
-                                Surface(
-                                    color = MaterialTheme.colorScheme.errorContainer,
-                                    shape = RoundedCornerShape(6.dp)
-                                ) {
-                                    Text(
-                                        "LOCKED", 
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.error,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable(onClick = onClick)
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val colors = listOf(SubjectMath, SubjectScience, SubjectEnglish, SubjectArt, SubjectHistory)
+                val color = colors[student.rollNo.hashCode().let { if (it < 0) -it else it } % colors.size]
+                
+                ColoredIconBox(
+                    icon = if (student.lockedTerms.isEmpty()) Icons.Default.Person else Icons.Default.Lock,
+                    color = if (student.lockedTerms.isEmpty()) color else MaterialTheme.colorScheme.error
+                )
+                
+                Spacer(Modifier.width(16.dp))
+                 Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(student.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                        if (student.lockedTerms.isNotEmpty()) {
+                            Spacer(Modifier.width(8.dp))
+                            Surface(
+                                color = MaterialTheme.colorScheme.errorContainer,
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Text(
+                                    "LOCKED", 
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
-                        Text("Roll No: ${student.rollNo} • Guardian: ${student.guardian}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    
-                    
-                    IconButton(onClick = onEdit) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.primary)
-                    }
-                    if (student.lockedTerms.isNotEmpty()) {
-                        IconButton(onClick = onUnlock) {
-                            Icon(Icons.Default.LockOpen, contentDescription = "Unlock", tint = SubjectScience)
-                        }
+                    Text("Roll No: ${student.rollNo} • Guardian: ${student.guardian}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                
+                
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.primary)
+                }
+                if (student.lockedTerms.isNotEmpty()) {
+                    IconButton(onClick = onUnlock) {
+                        Icon(Icons.Default.LockOpen, contentDescription = "Unlock", tint = SubjectScience)
                     }
                 }
             }
         }
     )
+    Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 }
 
 @Composable
@@ -130,33 +133,35 @@ fun TeacherRow(teacher: Teacher, modifier: Modifier = Modifier, onEdit: () -> Un
             }
         },
         dismissContent = {
-            ModernCard(onClick = {}) {
-                Row(
-                    modifier = Modifier.padding(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    ColoredIconBox(icon = Icons.Default.School, color = MaterialTheme.colorScheme.secondary)
-                    Spacer(Modifier.width(16.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(teacher.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                        val safeClasses = teacher.assignedClasses ?: emptyList()
-                        if (safeClasses.isNotEmpty()) {
-                            Text("Classes: ${safeClasses.joinToString()}", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
-                        } else {
-                            Text("No Assigned Classes", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelMedium)
-                        }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ColoredIconBox(icon = Icons.Default.School, color = MaterialTheme.colorScheme.secondary)
+                Spacer(Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(teacher.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    val safeClasses = teacher.assignedClasses ?: emptyList()
+                    if (safeClasses.isNotEmpty()) {
+                        Text("Classes: ${safeClasses.joinToString()}", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
+                    } else {
+                        Text("No Assigned Classes", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelMedium)
                     }
-                    
-                    IconButton(onClick = onEdit) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.primary)
-                    }
-                    IconButton(onClick = onAssignClass) {
-                        Icon(Icons.Default.Assignment, contentDescription = "Assign", tint = MaterialTheme.colorScheme.secondary)
-                    }
+                }
+                
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.primary)
+                }
+                IconButton(onClick = onAssignClass) {
+                    Icon(Icons.Default.AssignmentInd, contentDescription = "Assign Class", tint = MaterialTheme.colorScheme.secondary)
                 }
             }
         }
     )
+    Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 }
 
 @Composable

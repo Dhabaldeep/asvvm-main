@@ -142,7 +142,7 @@ fun StudentTimetableTab(timetable: List<com.school.asvvm.data.model.TimetablePer
             items(timetable.groupBy { it.dayOfWeek }.toList()) { (day, periods) ->
                 Text(day, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 periods.sortedBy { it.startTime }.forEach { period ->
-                    Card(modifier = Modifier.fillMaxWidth()) {
+                    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
                         Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                             Column {
                                 Text(period.subject, fontWeight = FontWeight.Bold)

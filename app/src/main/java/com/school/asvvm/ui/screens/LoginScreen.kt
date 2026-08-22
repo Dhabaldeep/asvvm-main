@@ -63,62 +63,23 @@ fun LoginScreen(
         }
     }
 
-    // Animated Background
-    val infiniteTransition = rememberInfiniteTransition(label = "bg")
-    val xOffset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(10000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ), label = "bg_x"
-    )
-    val yOffset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(15000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ), label = "bg_y"
-    )
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
-        // Sophisticated dynamic background gradient
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.03f),
-                            MaterialTheme.colorScheme.background
-                        ),
-                        center = Offset(xOffset, yOffset),
-                        radius = 2000f
-                    )
-                )
-        )
-
         AnimatedVisibility(
             visible = visible,
-            enter = slideInVertically(
-                initialOffsetY = { 200 },
-                animationSpec = tween(1000, easing = FastOutSlowInEasing)
-            ) + fadeIn(animationSpec = tween(1000)),
+            enter = fadeIn(animationSpec = tween(500)),
         ) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(24.dp),
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column(
                     modifier = Modifier

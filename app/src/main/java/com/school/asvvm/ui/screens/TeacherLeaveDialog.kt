@@ -30,13 +30,12 @@ fun TeacherLeaveDialog(
     var selectedTab by remember { mutableStateOf(0) }
     
     Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        onDismissRequest = onDismiss
     ) {
         Surface(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.background
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 4.dp
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Header

@@ -34,7 +34,7 @@ fun AddStudentDialog(className: String, onDismiss: () -> Unit, onConfirm: (Strin
 
     AlertDialog(
         modifier = Modifier.imePadding(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(12.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
         titleContentColor = MaterialTheme.colorScheme.primary,
@@ -68,7 +68,7 @@ fun AddTeacherDialog(onDismiss: () -> Unit, onConfirm: (String, String, String, 
 
     AlertDialog(
         modifier = Modifier.imePadding(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(12.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
         titleContentColor = MaterialTheme.colorScheme.primary,
@@ -122,7 +122,7 @@ fun AssignClassDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
 
     AlertDialog(
         modifier = Modifier.imePadding(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(12.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
         titleContentColor = MaterialTheme.colorScheme.primary,
@@ -248,7 +248,7 @@ fun AddSubjectDialog(
 
     AlertDialog(
         modifier = Modifier.imePadding(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(12.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
         titleContentColor = MaterialTheme.colorScheme.primary,
@@ -405,7 +405,7 @@ fun EditStudentDialog(student: com.school.asvvm.data.model.Student, onDismiss: (
 
     AlertDialog(
         modifier = Modifier.imePadding(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(12.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
         titleContentColor = MaterialTheme.colorScheme.primary,
@@ -436,7 +436,7 @@ fun EditTeacherDialog(teacher: Teacher, onDismiss: () -> Unit, onConfirm: (Strin
 
     AlertDialog(
         modifier = Modifier.imePadding(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(12.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
         titleContentColor = MaterialTheme.colorScheme.primary,
@@ -490,7 +490,7 @@ fun StudentDetailsDialog(
     
     Dialog(onDismissRequest = onDismiss) {
         ElevatedCard(
-            shape = RoundedCornerShape(28.dp),
+            shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth().heightIn(max = 600.dp),
             colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {

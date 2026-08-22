@@ -208,7 +208,7 @@ fun TeacherDashboard(
                     Spacer(Modifier.height(32.dp))
                     ModernButton(onClick = { viewModel.initialize(teacherName) }, text = "RETRY")
                     Spacer(Modifier.height(16.dp))
-                    OutlinedButton(onClick = onLogout, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
+                    OutlinedButton(onClick = onLogout, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
                         Text("SIGN OUT")
                     }
                 }
