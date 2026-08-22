@@ -164,17 +164,16 @@ fun TeacherGradingView(students: List<Student>, className: String, viewModel: Te
     val subjectConfigs by viewModel.subjectConfigs.collectAsState()
     
     // Map of Subject -> Pair(Written, Oral)
-    var scores by remember { mutableStateOf(mutableMapOf<String, Pair<String, String>>()) }
+    val scores = remember { androidx.compose.runtime.mutableStateMapOf<String, Pair<String, String>>() }
 
     // Pre-populate marks when student or term changes
     LaunchedEffect(selectedStudent, selectedTerm, marks) {
         if (selectedStudent != null) {
             val existing = marks.filter { it.studentId == selectedStudent?.id && it.term == selectedTerm.name }
-            val newScores = mutableMapOf<String, Pair<String, String>>()
+            scores.clear()
             existing.forEach { m ->
-                newScores[m.subject] = Pair(m.writtenMarks, m.oralMarks)
+                scores[m.subject] = Pair(m.writtenMarks, m.oralMarks)
             }
-            scores = newScores
         }
     }
 
@@ -286,7 +285,7 @@ fun TeacherGradingView(students: List<Student>, className: String, viewModel: Te
                     }
                 }
 
-                items(termConfigs) { config ->
+                items(termConfigs, key = { it.id }) { config ->
                     val subjectColor = when {
                         config.subjectName.contains("Math", true) -> SubjectMath
                         config.subjectName.contains("Sci", true) -> SubjectScience
@@ -322,7 +321,7 @@ fun TeacherGradingView(students: List<Student>, className: String, viewModel: Te
                                     onValueChange = { 
                                         val intVal = it.toIntOrNull()
                                         if (it.isEmpty() || (intVal != null && intVal <= config.maxWritten)) {
-                                            scores = scores.toMutableMap().apply { put(config.subjectName, Pair(it, "0")) }
+                                            scores[config.subjectName] = Pair(it, "0")
                                         }
                                     },
                                     label = "Written Marks (Max ${config.maxWritten})",
@@ -338,7 +337,7 @@ fun TeacherGradingView(students: List<Student>, className: String, viewModel: Te
                                             onValueChange = { 
                                                 val intVal = it.toIntOrNull()
                                                 if (it.isEmpty() || (intVal != null && intVal <= config.maxWritten)) {
-                                                    scores = scores.toMutableMap().apply { put(config.subjectName, Pair(it, currentScore.second)) }
+                                                    scores[config.subjectName] = Pair(it, currentScore.second)
                                                 }
                                             },
                                             label = "Written (Max ${config.maxWritten})",
@@ -353,7 +352,7 @@ fun TeacherGradingView(students: List<Student>, className: String, viewModel: Te
                                             onValueChange = { 
                                                 val intVal = it.toIntOrNull()
                                                 if (it.isEmpty() || (intVal != null && intVal <= config.maxOral)) {
-                                                    scores = scores.toMutableMap().apply { put(config.subjectName, Pair(currentScore.first, it)) }
+                                                    scores[config.subjectName] = Pair(currentScore.first, it)
                                                 }
                                             },
                                             label = "Oral (Max ${config.maxOral})",

@@ -401,7 +401,7 @@ class SchoolRepository(
         return try {
             val batch = firestore.batch()
             for (m in marks) {
-                val docId = "${m.studentId}_${m.subject}"
+                val docId = "${m.studentId}_${m.subject}_${m.term}"
                 val docRef = firestore.collection("marks").document(docId)
                 batch.set(docRef, m)
             }
