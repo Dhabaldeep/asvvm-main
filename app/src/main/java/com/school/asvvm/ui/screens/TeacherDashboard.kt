@@ -129,31 +129,36 @@ fun TeacherDashboard(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
                     icon = { Icon(Icons.Default.Groups, contentDescription = null) },
-                    label = { Text("Students") }
+                    label = { Text("Students", maxLines = 1, softWrap = false) },
+                    alwaysShowLabel = false
                 )
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
                     icon = { Icon(Icons.Default.LibraryAdd, contentDescription = null) },
-                    label = { Text("Grading") }
+                    label = { Text("Grading", maxLines = 1, softWrap = false) },
+                    alwaysShowLabel = false
                 )
                 NavigationBarItem(
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
                     icon = { Icon(Icons.Default.Assessment, contentDescription = null) },
-                    label = { Text("Reports") }
+                    label = { Text("Reports", maxLines = 1, softWrap = false) },
+                    alwaysShowLabel = false
                 )
                 NavigationBarItem(
                     selected = selectedTab == 3,
                     onClick = { selectedTab = 3 },
                     icon = { Icon(Icons.Default.EventAvailable, contentDescription = null) },
-                    label = { Text("Attendance") }
+                    label = { Text("Attendance", maxLines = 1, softWrap = false) },
+                    alwaysShowLabel = false
                 )
                 NavigationBarItem(
                     selected = selectedTab == 4,
                     onClick = { selectedTab = 4 },
                     icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
-                    label = { Text("Profile") }
+                    label = { Text("Profile", maxLines = 1, softWrap = false) },
+                    alwaysShowLabel = false
                 )
             }
         },
