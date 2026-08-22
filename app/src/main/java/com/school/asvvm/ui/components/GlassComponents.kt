@@ -89,8 +89,8 @@ fun ModernCard(
 ) {
     if (onClick != null) {
         ElevatedCard(
-            modifier = modifier.padding(8.dp).clip(RoundedCornerShape(16.dp)),
-            shape = RoundedCornerShape(16.dp),
+            modifier = modifier.padding(8.dp).clip(RoundedCornerShape(8.dp)),
+            shape = RoundedCornerShape(8.dp),
             colors = CardDefaults.elevatedCardColors(containerColor = containerColor),
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
             onClick = onClick
@@ -102,9 +102,9 @@ fun ModernCard(
     } else {
         ElevatedCard(
             modifier = modifier.padding(8.dp),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(8.dp),
             colors = CardDefaults.elevatedCardColors(containerColor = containerColor),
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 content()
@@ -145,14 +145,14 @@ fun ModernButton(
     Button(
         onClick = onClick,
         modifier = modifier
-            .height(52.dp)
+            .height(48.dp)
             .fillMaxWidth()
             .shadow(
-                elevation = 2.dp,
-                shape = RoundedCornerShape(12.dp),
-                spotColor = containerColor.copy(alpha = 0.2f)
+                elevation = 1.dp,
+                shape = RoundedCornerShape(8.dp),
+                spotColor = containerColor.copy(alpha = 0.1f)
             ),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -185,7 +185,7 @@ fun PremiumTextField(
         enabled = enabled,
         label = { Text(label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium) },
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(8.dp),
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         visualTransformation = visualTransformation,
@@ -261,9 +261,9 @@ fun EmptyStateView(icon: ImageVector, title: String, subtitle: String) {
         verticalArrangement = Arrangement.Center
     ) {
         Surface(
-            shape = RoundedCornerShape(32.dp),
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-            modifier = Modifier.size(120.dp)
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+            modifier = Modifier.size(100.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
