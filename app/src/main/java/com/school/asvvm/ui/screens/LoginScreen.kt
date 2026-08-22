@@ -241,7 +241,7 @@ fun LoginScreen(
                         PremiumTextField(
                             value = rollNo,
                             onValueChange = { rollNo = it },
-                            label = "Roll Number",
+                            label = "Roll No / Phone Number",
                             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
                         )
 

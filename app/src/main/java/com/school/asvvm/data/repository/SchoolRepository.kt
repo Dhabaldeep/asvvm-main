@@ -554,7 +554,7 @@ class SchoolRepository(
     }
 
     // --- Student Authentication ---
-    suspend fun verifyStudentAccess(rollNo: String, accessCode: String): com.school.asvvm.data.model.Student? {
+    suspend fun verifyStudentAccess(rollNoOrPhone: String, accessCode: String): com.school.asvvm.data.model.Student? {
         // Authenticate generically first to bypass 'request.auth != null' Firestore security rules
         try {
             auth.signInWithEmailAndPassword("student-auth@school.com", "student123").await()
@@ -566,12 +566,35 @@ class SchoolRepository(
             }
         }
         
-        val snapshot = firestore.collection("students")
-            .whereEqualTo("rollNo", rollNo)
+        // 1. Check by Roll No
+        val snapshotRoll = firestore.collection("students")
+            .whereEqualTo("rollNo", rollNoOrPhone)
             .whereEqualTo("accessCode", accessCode)
             .get()
             .await()
-        return snapshot.documents.firstOrNull()?.toObject(com.school.asvvm.data.model.Student::class.java)?.sanitize()
+            
+        var doc = snapshotRoll.documents.firstOrNull()
+        
+        // 2. If not found by Roll No, check by phone / guardian phone
+        if (doc == null) {
+            val snapshotPhone = firestore.collection("students")
+                .whereEqualTo("phone", rollNoOrPhone)
+                .whereEqualTo("accessCode", accessCode)
+                .get()
+                .await()
+            doc = snapshotPhone.documents.firstOrNull()
+        }
+
+        if (doc == null) {
+            val snapshotGuardian = firestore.collection("students")
+                .whereEqualTo("guardian", rollNoOrPhone)
+                .whereEqualTo("accessCode", accessCode)
+                .get()
+                .await()
+            doc = snapshotGuardian.documents.firstOrNull()
+        }
+        
+        return doc?.toObject(com.school.asvvm.data.model.Student::class.java)?.sanitize()
     }
 
     private fun Student.sanitize(): Student = this.copy(

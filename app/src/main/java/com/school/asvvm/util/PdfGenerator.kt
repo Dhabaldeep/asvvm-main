@@ -54,6 +54,23 @@ object PdfGenerator {
     ): String {
         val uniqueSubjects = subjectConfigs.map { it.subjectName }.distinct()
         
+        // Determine completed terms from marks
+        val completedTerms = marks.map { it.term }.toSet()
+        val isAnnualCompleted = completedTerms.contains("ANNUAL")
+        val isSecondHalfCompleted = completedTerms.contains("SECOND_HALF")
+        val isFirstHalfCompleted = completedTerms.contains("FIRST_HALF")
+
+        val resultStatus = when {
+            isAnnualCompleted -> if (grade == "F") "DETAINED" else "PROMOTED"
+            isSecondHalfCompleted -> if (grade == "F") "NEEDS IMPROVEMENT" else "2ND TERM COMPLETED"
+            isFirstHalfCompleted -> if (grade == "F") "NEEDS IMPROVEMENT" else "1ST TERM COMPLETED"
+            else -> "RESULT AWAITED"
+        }
+
+        // Calculate dynamic total max marks for completed terms
+        var dynamicMaxTotal = 0
+        var dynamicObtainedTotal = 0
+
         // Generate Table Rows dynamically based on subjects
         val rows = uniqueSubjects.joinToString("") { subject ->
             val m1 = marks.find { it.subject == subject && it.term == "FIRST_HALF" }
@@ -67,9 +84,19 @@ object PdfGenerator {
             val grandTotal = getT(m1) + getT(m2) + getT(ma)
 
             val sConfigs = subjectConfigs.filter { it.subjectName == subject }
-            val o1 = getO(m1, sConfigs.find { it.term == "FIRST_HALF" }?.hasOral == true)
-            val o2 = getO(m2, sConfigs.find { it.term == "SECOND_HALF" }?.hasOral == true)
-            val oa = getO(ma, sConfigs.find { it.term == "ANNUAL" }?.hasOral == true)
+            val c1 = sConfigs.find { it.term == "FIRST_HALF" }
+            val c2 = sConfigs.find { it.term == "SECOND_HALF" }
+            val ca = sConfigs.find { it.term == "ANNUAL" }
+
+            val o1 = getO(m1, c1?.hasOral == true)
+            val o2 = getO(m2, c2?.hasOral == true)
+            val oa = getO(ma, ca?.hasOral == true)
+
+            // Add to dynamic totals for completed terms
+            if (m1 != null && c1 != null) dynamicMaxTotal += c1.maxWritten + (if (c1.hasOral) c1.maxOral else 0)
+            if (m2 != null && c2 != null) dynamicMaxTotal += c2.maxWritten + (if (c2.hasOral) c2.maxOral else 0)
+            if (ma != null && ca != null) dynamicMaxTotal += ca.maxWritten + (if (ca.hasOral) ca.maxOral else 0)
+            dynamicObtainedTotal += grandTotal
 
             """
             <tr>
@@ -200,7 +227,7 @@ object PdfGenerator {
                         <div class="res-item">
                             <span class="res-lbl">Final Status</span>
                             <span class="res-val" style="color: ${if(grade == "F") "#D32F2F" else "#2E7D32"}">
-                                ${if(grade == "F") "DETAINED" else "PROMOTED"}
+                                $resultStatus
                             </span>
                         </div>
                     </div>

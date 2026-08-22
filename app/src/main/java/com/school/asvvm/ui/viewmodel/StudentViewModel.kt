@@ -29,6 +29,9 @@ class StudentViewModel @Inject constructor(
     private val _marks = MutableStateFlow<List<Mark>>(emptyList())
     val marks: StateFlow<List<Mark>> = _marks.asStateFlow()
 
+    private val _subjectConfigs = MutableStateFlow<List<SubjectConfig>>(emptyList())
+    val subjectConfigs: StateFlow<List<SubjectConfig>> = _subjectConfigs.asStateFlow()
+
     private val _timetable = MutableStateFlow<List<TimetablePeriod>>(emptyList())
     val timetable: StateFlow<List<TimetablePeriod>> = _timetable.asStateFlow()
 
@@ -42,24 +45,32 @@ class StudentViewModel @Inject constructor(
             val student = schoolRepository.getStudentById(studentId)
             if (student != null) {
                 _studentProfile.value = student
+                
                 // Fetch timetable
-                schoolRepository.listenToTimetable(student.className).collect { periods ->
-                    _timetable.value = periods
+                launch {
+                    schoolRepository.listenToTimetable(student.className).collect { periods ->
+                        _timetable.value = periods
+                    }
+                }
+
+                // Fetch marks for this student
+                launch {
+                    schoolRepository.getMarksForStudent(student.id).collect { marksList ->
+                        _marks.value = marksList
+                    }
+                }
+
+                // Fetch subject configs for student's class
+                launch {
+                    schoolRepository.getSubjectConfigs(student.className).collect { configs ->
+                        _subjectConfigs.value = configs
+                    }
                 }
             } else {
                 _message.value = "Failed to load student profile."
             }
             _isLoading.value = false
         }
-        
-        // Fetch marks and attendance (In a real app this would have dedicated endpoints for a specific student)
-        // For now, we will assume the Student portal is largely read-only of existing data
-        viewModelScope.launch {
-            // Need a way to fetch marks for a student across all subjects
-            // Since we don't have a direct endpoint for all marks of a student, we will leave this empty for now
-            // or we could add one to SchoolRepository.
-        }
-        _isLoading.value = false
     }
 
     fun clearMessage() {
