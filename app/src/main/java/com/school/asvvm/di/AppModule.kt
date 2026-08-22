@@ -26,10 +26,15 @@ object AppModule {
     @Singleton
     fun provideFirebaseFirestore(): FirebaseFirestore {
         val firestore = Firebase.firestore
-        val settings = FirebaseFirestoreSettings.Builder()
-            .setLocalCacheSettings(PersistentCacheSettings.newBuilder().build())
-            .build()
-        firestore.firestoreSettings = settings
+        try {
+            val settings = FirebaseFirestoreSettings.Builder()
+                .setLocalCacheSettings(PersistentCacheSettings.newBuilder().build())
+                .build()
+            firestore.firestoreSettings = settings
+        } catch (e: IllegalStateException) {
+            // Firestore is already initialized (e.g. by NoticeWorker or MainActivity).
+            // Its settings cannot be changed anymore, so we safely ignore this.
+        }
         return firestore
     }
 
