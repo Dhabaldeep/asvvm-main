@@ -90,9 +90,6 @@ fun TeacherDashboard(
                 subtitle = "${teacherProfile?.name ?: teacherName}",
                 onLogout = onLogout,
                 actions = {
-                    IconButton(onClick = { showLeaveDialog = true }) {
-                        Icon(Icons.Default.EventAvailable, contentDescription = "Apply Leave", tint = MaterialTheme.colorScheme.tertiary)
-                    }
                     Box {
                         IconButton(onClick = { showNotices = true }) {
                             Icon(Icons.Default.Notifications, contentDescription = "Notices", tint = MaterialTheme.colorScheme.primary)
@@ -106,13 +103,6 @@ fun TeacherDashboard(
                             expanded = showSettingsMenu,
                             onDismissRequest = { showSettingsMenu = false }
                         ) {
-                            DropdownMenuItem(
-                                text = { Text("Apply for Leave") },
-                                onClick = {
-                                    showSettingsMenu = false
-                                    showLeaveDialog = true
-                                }
-                            )
                             DropdownMenuItem(
                                 text = { Text("Change Password") },
                                 onClick = {

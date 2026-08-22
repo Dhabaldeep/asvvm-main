@@ -6,7 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -68,9 +70,11 @@ fun TeacherProfileView(
     onSignOut: () -> Unit = {}
 ) {
     if (teacher == null) return
+    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
@@ -113,7 +117,7 @@ fun TeacherProfileView(
         
         Spacer(Modifier.height(20.dp))
         
-        // Managed Stats Grid
+        // Managed Stats Grid (Classes & Leave Quick Card)
         val safeClasses = teacher.assignedClasses ?: emptyList()
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -130,6 +134,7 @@ fun TeacherProfileView(
             Surface(
                 modifier = Modifier
                     .weight(1f)
+                    .clip(RoundedCornerShape(20.dp))
                     .clickable(onClick = onApplyLeave),
                 shape = RoundedCornerShape(20.dp),
                 color = MaterialTheme.colorScheme.tertiaryContainer
@@ -148,8 +153,8 @@ fun TeacherProfileView(
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            "Apply",
-                            style = MaterialTheme.typography.titleLarge,
+                            "Apply Now",
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.onTertiaryContainer
                         )
@@ -158,7 +163,7 @@ fun TeacherProfileView(
                         Icons.Default.EventAvailable,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(26.dp)
                     )
                 }
             }
@@ -180,29 +185,16 @@ fun TeacherProfileView(
 
         Spacer(Modifier.height(24.dp))
 
-        // Quick Action Buttons
+        // Account Action Buttons
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Button(
-                onClick = onApplyLeave,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
-            ) {
-                Icon(Icons.Default.EventAvailable, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("APPLY FOR LEAVE", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
-            }
-
             OutlinedButton(
                 onClick = onChangePassword,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
+                    .height(50.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -214,7 +206,7 @@ fun TeacherProfileView(
                 onClick = onSignOut,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
+                    .height(50.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
             ) {
@@ -222,6 +214,8 @@ fun TeacherProfileView(
                 Spacer(Modifier.width(8.dp))
                 Text("SIGN OUT", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
             }
+            
+            Spacer(Modifier.height(16.dp))
         }
     }
 }
