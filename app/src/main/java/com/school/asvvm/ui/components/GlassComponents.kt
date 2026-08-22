@@ -87,20 +87,28 @@ fun ModernCard(
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    ElevatedCard(
-        modifier = modifier
-            .padding(8.dp)
-            .then(if (onClick != null) Modifier.clip(RoundedCornerShape(16.dp)).background(Color.Transparent) else Modifier),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = containerColor),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
-        onClick = onClick ?: {},
-        enabled = onClick != null
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+    if (onClick != null) {
+        ElevatedCard(
+            modifier = modifier.padding(8.dp).clip(RoundedCornerShape(16.dp)),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.elevatedCardColors(containerColor = containerColor),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
+            onClick = onClick
         ) {
-            content()
+            Column(modifier = Modifier.padding(16.dp)) {
+                content()
+            }
+        }
+    } else {
+        ElevatedCard(
+            modifier = modifier.padding(8.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.elevatedCardColors(containerColor = containerColor),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                content()
+            }
         }
     }
 }
